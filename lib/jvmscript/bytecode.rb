@@ -261,7 +261,7 @@ module Compiler
     end
     
     def trycatch(from, to, target, type) 
-      method_visitor.visit_try_catch_block(from, to, target, p(type)) 
+      method_visitor.visit_try_catch_block(from, to, target, path(type)) 
     end
     
     class SmartLabel
@@ -287,9 +287,9 @@ module Compiler
     
     def println(type = JObject)
       dup
-      getstatic System, "out", PrintStream
+      getstatic JSystem, "out", JPrintStream
       swap
-      invokevirtual PrintStream, "println", [JVoid::TYPE, type]
+      invokevirtual JPrintStream, "println", [JVoid::TYPE, type]
     end
     
     def swap2

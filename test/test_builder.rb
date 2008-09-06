@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'compiler/builder'
+require 'jvmscript/builder'
 
 class TestBuilder < Test::Unit::TestCase
   import java.util.ArrayList

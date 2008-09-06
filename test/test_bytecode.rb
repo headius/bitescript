@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'compiler/bytecode'
+require 'jvmscript/bytecode'
 
 class TestBytecode < Test::Unit::TestCase
   include Compiler::Bytecode
@@ -264,7 +264,7 @@ class TestBytecode < Test::Unit::TestCase
   end
   
   def test_trycatch
-    assert_equal([:visit_try_catch_block, :a, :b, :c, :d], @dummy.single {trycatch :a, :b, :c, :d})
+    assert_equal([:visit_try_catch_block, :a, :b, :c, "java/lang/Integer"], @dummy.single {trycatch :a, :b, :c, Integer})
   end
   
   def test_jump_insns
