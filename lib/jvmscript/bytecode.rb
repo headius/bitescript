@@ -323,8 +323,10 @@ module Compiler
         end
       elsif (num <= Java::java.lang.Short::MAX_VALUE && num >= Java::java.lang.Short::MIN_VALUE)
         sipush(num)
+      elsif (num <= Java::java.lang.Integer::MAX_VALUE && num >= Java::java.lang.Integer::MIN_VALUE)
+        ldc_int(num)
       else
-        ldc(num)
+        ldc_long(num)
       end
     end
   end

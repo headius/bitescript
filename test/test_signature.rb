@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'compiler/signature'
+require 'jvmscript/signature'
 
 class TestSignature < Test::Unit::TestCase
   include Java
@@ -19,12 +19,10 @@ class TestSignature < Test::Unit::TestCase
   
   def test_classname
     assert_equal("java.util.ArrayList", Signature.classname("java/util/ArrayList"))
-    assert_equal("java.util.ArrayList", Signature.c("java/util/ArrayList"))
   end
   
   def test_path
     assert_equal("java/util/ArrayList", Signature.path(ArrayList))
-    assert_equal("java/util/ArrayList", Signature.p(ArrayList))
   end
   
   def test_class_id
