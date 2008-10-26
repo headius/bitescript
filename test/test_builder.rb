@@ -3,6 +3,30 @@ require 'jvmscript/builder'
 
 class TestBuilder < Test::Unit::TestCase
   import java.util.ArrayList
+  
+  def setup
+    @builder = Compiler::FileBuilder.build('somefile.source')
+  end
+
+  def test_instance_method_this
+    cb = @builder.public_class('Foo', @builder.object);
+    method = cb.public_method("foo", @builder.void)
+
+    # ensure "this" is taking slot zero
+    method.local('another')
+    assert_equal(method.local('this'), 0)
+    assert_equal(method.local('another'), 1)
+  end
+
+  def test_constructor_this
+    cb = @builder.public_class('Foo', @builder.object);
+    constructor = cb.public_constructor
+
+    # ensure "this" is taking slot zero
+    constructor.local('another')
+    assert_equal(constructor.local('this'), 0)
+    assert_equal(constructor.local('another'), 1)
+  end
 
   def test_file_builder
     builder = Compiler::FileBuilder.build("somefile.source") do

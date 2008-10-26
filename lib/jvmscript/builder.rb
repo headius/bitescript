@@ -214,10 +214,12 @@ module Compiler
           field(Opcodes::ACC_STATIC | Opcodes::ACC_#{modifier.upcase}, name, type)
         end
       ", binding, __FILE__, __LINE__
-      # instance methods
+      # instance methods; also defines a "this" local at index 0
       eval "
         def #{modifier}_method(name, *signature, &block)
-          method(Opcodes::ACC_#{modifier.upcase}, name, signature, &block)
+          m = method(Opcodes::ACC_#{modifier.upcase}, name, signature, &block)
+          m.local 'this'
+          m
         end
       ", binding, __FILE__, __LINE__
       # static methods
@@ -226,9 +228,12 @@ module Compiler
           method(Opcodes::ACC_STATIC | Opcodes::ACC_#{modifier.upcase}, name, signature, &block)
         end
       ", binding, __FILE__, __LINE__
+      # constructors; also defines a "this" local at index 0
       eval "
         def #{modifier}_constructor(*signature, &block)
-          method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], &block)
+          m = method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], &block)
+          m.local 'this'
+          m
         end
       ", binding, __FILE__, __LINE__
     end
