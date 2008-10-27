@@ -12,6 +12,8 @@ class TestJavaClass < Test::Unit::TestCase
 
     assert_not_nil cons1
     assert_not_nil cons2
+    assert_equal [], cons1.parameter_types
+    assert_equal [java.lang.String.java_class], cons2.parameter_types
 
     cls = JVMScript::FileBuilder.new('x').public_class('y')
     cls.public_constructor()
@@ -22,6 +24,8 @@ class TestJavaClass < Test::Unit::TestCase
 
     assert_not_nil cons1
     assert_not_nil cons2
+    assert_equal [], cons1.parameter_types
+    assert_equal [java.lang.String.java_class], cons2.parameter_types
   end
 
   def test_java_method
@@ -34,6 +38,8 @@ class TestJavaClass < Test::Unit::TestCase
     assert_not_nil m2
     assert_equal java.lang.String.java_class, m1.return_type
     assert_equal Java::boolean.java_class, m2.return_type
+    assert_equal [], m1.parameter_types
+    assert_equal [java.lang.Object.java_class], m2.parameter_types
 
     cls = JVMScript::FileBuilder.new('x').public_class('y')
     cls.public_method('toString', java.lang.String.java_class)
@@ -46,5 +52,7 @@ class TestJavaClass < Test::Unit::TestCase
     assert_not_nil m2
     assert_equal java.lang.String.java_class, m1.return_type
     assert_equal Java::boolean.java_class, m2.return_type
+    assert_equal [], m1.parameter_types
+    assert_equal [java.lang.Object.java_class], m2.parameter_types
   end
 end
