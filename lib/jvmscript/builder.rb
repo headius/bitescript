@@ -151,9 +151,8 @@ module Compiler
     
     attr_accessor :class_name
     attr_accessor :superclass
-    attr_accessor :constructor
-    attr_accessor :instance_methods
-    attr_accessor :static_methods
+    attr_accessor :constructors
+    attr_accessor :methods
     attr_accessor :imports
     attr_accessor :fields
 
@@ -168,10 +167,10 @@ module Compiler
       interfaces.each {|interface| interface_paths << path(interface)}
       @class_writer.visit(Opcodes::V1_4, Opcodes::ACC_PUBLIC | Opcodes::ACC_SUPER, class_name, nil, path(superclass), interface_paths.to_java(:string))
       @class_writer.visit_source(file_name, nil)
-      
+
       @constructor = nil
-      @instance_methods = {}
-      @static_methods = {}
+      @constructors = {}
+      @methods = {}
       
       @imports = {}
       
@@ -195,10 +194,6 @@ module Compiler
     
     def generate
       String.from_java_bytes(@class_writer.to_byte_array)
-    end
-
-    def constructor(*signature, &block)
-      method("<init>", *signature, &block)
     end
 
     %w[public private protected].each do |modifier|
@@ -230,7 +225,7 @@ module Compiler
       ", binding, __FILE__, __LINE__
       # constructors; also defines a "this" local at index 0
       eval "
-        def #{modifier}_constructor(*signature, &block)
+          def #{modifier}_constructor(*signature, &block)
           m = method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], &block)
           m.local 'this'
           m
@@ -241,6 +236,13 @@ module Compiler
     def method(flags, name, signature, &block)
       mb = MethodBuilder.new(self, flags, name, signature)
 
+      if name == "<init>"
+        constructors[signature[1..-1]] = mb
+      else
+        methods[name] ||= {}
+        methods[name][signature[1..-1]] = mb
+      end
+      
       if block_given?
         mb.start
         mb.instance_eval(&block)
@@ -248,6 +250,23 @@ module Compiler
       end
 
       mb
+    end
+
+    def java_method(name, *params)
+      if methods[name]
+        method = methods[name][params]
+      end
+
+      method or raise NameError.new("failed to find method #{name}#{sig(params)} on #{self}")
+    end
+
+    def constructor(*params)
+      constructors[params] or raise NameError.new("failed to find constructor #{sig(params)} on #{self}")
+    end
+
+    def interface?
+      # TODO: interface types
+      false
     end
     
     def field(flags, name, type)
@@ -290,6 +309,9 @@ module Compiler
     
     attr_reader :method_visitor
     attr_reader :static
+    attr_reader :signature
+    attr_reader :name
+    attr_reader :class_builder
     
     def initialize(class_builder, modifiers, name, signature)
       @class_builder = class_builder
@@ -302,6 +324,18 @@ module Compiler
       @locals = {}
       
       @static = (modifiers & Opcodes::ACC_STATIC) != 0
+    end
+
+    def parameter_types
+      signature[1..-1]
+    end
+
+    def return_type
+      signature[0]
+    end
+
+    def declaring_class
+      @class_builder
     end
     
     def self.build(class_builder, modifiers, name, signature, &block)
