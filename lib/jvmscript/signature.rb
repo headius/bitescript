@@ -1,6 +1,6 @@
 require 'java'
 
-module Compiler
+module JVMScript
   module JavaTypes
     import java.lang.Object
     import java.lang.Byte

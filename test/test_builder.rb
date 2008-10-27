@@ -5,7 +5,7 @@ class TestBuilder < Test::Unit::TestCase
   import java.util.ArrayList
   
   def setup
-    @builder = Compiler::FileBuilder.build('somefile.source')
+    @builder = JVMScript::FileBuilder.build('somefile.source')
   end
 
   def test_instance_method_this
@@ -29,7 +29,7 @@ class TestBuilder < Test::Unit::TestCase
   end
 
   def test_file_builder
-    builder = Compiler::FileBuilder.build("somefile.source") do
+    builder = JVMScript::FileBuilder.build("somefile.source") do
       package "org.awesome", "stuff" do
         public_class "MyClass", object do
           public_field "list", ArrayList

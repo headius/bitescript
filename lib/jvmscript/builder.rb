@@ -2,7 +2,7 @@ require 'jvmscript/bytecode'
 require 'jvmscript/signature'
 require 'fileutils'
 
-module Compiler
+module JVMScript
   module Util
     def type_from_dotted(dotted_name)
       JavaUtilities.get_proxy_class(dotted_name).java_class
@@ -305,7 +305,7 @@ module Compiler
     end
 
     include QuickTypes
-    include Compiler::Bytecode
+    include JVMScript::Bytecode
     
     attr_reader :method_visitor
     attr_reader :static

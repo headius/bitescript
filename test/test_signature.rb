@@ -15,7 +15,7 @@ class TestSignature < Test::Unit::TestCase
   import java.lang.Double
   import java.lang.Void
 
-  Signature = Compiler::Signature
+  Signature = JVMScript::Signature
   
   def test_classname
     assert_equal("java.util.ArrayList", Signature.classname("java/util/ArrayList"))
