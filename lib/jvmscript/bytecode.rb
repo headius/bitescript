@@ -177,10 +177,10 @@ module JVMScript
       when "GETFIELD", "PUTFIELD", "GETSTATIC", "PUTSTATIC"
         # field instructions
         line = __LINE__; eval "
-            def #{const_down}(type, name, field_sig)
-              method_visitor.visit_field_insn(Opcodes::#{const_name}, path(type), name.to_s, ci(*field_sig))
+            def #{const_down}(type, name, field_type)
+              method_visitor.visit_field_insn(Opcodes::#{const_name}, path(type), name.to_s, ci(field_type))
 
-              case field_sig
+              case field_type
               when Java::boolean, Java::short, Java::char, Java::int, Java::float
                 delta = 1
               when Java::long, Java::double
