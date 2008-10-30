@@ -212,6 +212,7 @@ module JVMScript
         # jump instructions
         line = __LINE__; eval "
             def #{const_down}(target)
+              target = sym_to_label(target) if Symbol === target
               method_visitor.visit_jump_insn(Opcodes::#{const_name}, target.label)
               #{OpcodeStackDeltas[const_name]}
             end
@@ -229,15 +230,37 @@ module JVMScript
         OpcodeInstructions[const_name] = const_down
           
       when "LOOKUPSWITCH"
-        def lookupswitch(default, ints, cases)
-          method_visitor.visit_lookup_switch_insn(default, ints, cases)
+        def lookupswitch(default, ints, cases = [])
+          cases = cases.to_ary
+          if cases.size > 0
+            # symbol labels, map them to actual
+            case_labels = cases.map do |lbl|
+              lbl = sym_to_label(lbl) if Symbol === lbl
+              lbl.label
+            end
+          end
+          if default && Symbol === default
+            default = sym_to_label(default)
+          end
+          method_visitor.visit_lookup_switch_insn(default.label, ints, case_labels)
           -1
         end
         OpcodeInstructions['LOOKUPSWITCH'] = 'lookupswitch'
         
       when "TABLESWITCH"
-        def tableswitch(min, max, default, cases)
-          method_visitor.visit_table_switch_insn(min, max, default, cases)
+        def tableswitch(min, max, default, cases = [])
+          cases = cases.to_ary
+          if cases.size > 0
+            # symbol labels, map them to actual
+            case_labels = cases.map do |lbl|
+              lbl = sym_to_label(lbl) if Symbol === lbl
+              lbl.label
+            end
+          end
+          if default && Symbol === default
+            default = sym_to_label(default)
+          end
+          method_visitor.visit_table_switch_insn(min, max, default.label, case_labels)
           -1
         end
         OpcodeInstructions['TABLESWITCH'] = 'tableswitch'
@@ -268,8 +291,12 @@ module JVMScript
       method_visitor.visit_end
     end
     
-    def trycatch(from, to, target, type) 
-      method_visitor.visit_try_catch_block(from, to, target, path(type)) 
+    def trycatch(from, to, target, type)
+      from = sym_to_label(from) if Symbol === from
+      to = sym_to_label(to) if Symbol === to
+      target = sym_to_label(target) if Symbol === target
+      
+      method_visitor.visit_try_catch_block(from.label, to.label, target.label, path(type))
     end
     
     class SmartLabel
@@ -284,9 +311,27 @@ module JVMScript
         @method_visitor.visit_label(@label)
       end
     end
+
+    def labels
+      @labels ||= {}
+    end
+
+    def sym_to_label(id)
+      lbl = labels[id] or raise "Unknown label '#{id}'"
+    end
     
-    def label
-      return SmartLabel.new(method_visitor)
+    def label(id = nil)
+      if id
+        label = labels[id]
+        if label
+          raise "Duplicate label '#{id}'"
+        end
+        label = labels[id] = SmartLabel.new(method_visitor)
+        label.set!
+        label
+      else
+        return SmartLabel.new(method_visitor)
+      end
     end
     
     def aprintln

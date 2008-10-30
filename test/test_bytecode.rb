@@ -284,30 +284,54 @@ class TestBytecode < Test::Unit::TestCase
   end
   
   def test_trycatch
-    assert_equal([:visit_try_catch_block, :a, :b, :c, "java/lang/Integer"], @dummy.single {trycatch :a, :b, :c, Integer})
+    a_lbl = label :a
+    b_lbl = label :b
+    c_lbl = label :c
+    assert_equal([:visit_try_catch_block, a_lbl.label, b_lbl.label, c_lbl.label, "java/lang/Integer"], @dummy.single {trycatch :a, :b, :c, Integer})
+    assert_equal([:visit_try_catch_block, a_lbl.label, b_lbl.label, c_lbl.label, "java/lang/Integer"], @dummy.single {trycatch a_lbl, b_lbl, c_lbl, Integer})
   end
   
   def test_jump_insns
-    lbl = label
-    assert_equal([:visit_jump_insn, Opcodes::GOTO, lbl.label], @dummy.single {goto lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IFEQ, lbl.label], @dummy.single {ifeq lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IFNE, lbl.label], @dummy.single {ifne lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IFLE, lbl.label], @dummy.single {ifle lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IFLT, lbl.label], @dummy.single {iflt lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IFGE, lbl.label], @dummy.single {ifge lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IFGT, lbl.label], @dummy.single {ifgt lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IF_ACMPEQ, lbl.label], @dummy.single {if_acmpeq lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IF_ACMPNE, lbl.label], @dummy.single {if_acmpne lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPEQ, lbl.label], @dummy.single {if_icmpeq lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPNE, lbl.label], @dummy.single {if_icmpne lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPLT, lbl.label], @dummy.single {if_icmplt lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPGT, lbl.label], @dummy.single {if_icmpgt lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPLE, lbl.label], @dummy.single {if_icmple lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPGE, lbl.label], @dummy.single {if_icmpge lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IFNULL, lbl.label], @dummy.single {ifnull lbl})
-    assert_equal([:visit_jump_insn, Opcodes::IFNONNULL, lbl.label], @dummy.single {ifnonnull lbl})
-    assert_equal([:visit_jump_insn, Opcodes::JSR, lbl.label], @dummy.single {jsr lbl})
-    assert_equal([:visit_label, lbl.label], @dummy.single {lbl.set!})
+    a_lbl = label :a
+    assert_equal([:visit_jump_insn, Opcodes::GOTO, a_lbl.label], @dummy.single {goto a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IFEQ, a_lbl.label], @dummy.single {ifeq a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IFNE, a_lbl.label], @dummy.single {ifne a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IFLE, a_lbl.label], @dummy.single {ifle a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IFLT, a_lbl.label], @dummy.single {iflt a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IFGE, a_lbl.label], @dummy.single {ifge a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IFGT, a_lbl.label], @dummy.single {ifgt a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ACMPEQ, a_lbl.label], @dummy.single {if_acmpeq a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ACMPNE, a_lbl.label], @dummy.single {if_acmpne a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPEQ, a_lbl.label], @dummy.single {if_icmpeq a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPNE, a_lbl.label], @dummy.single {if_icmpne a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPLT, a_lbl.label], @dummy.single {if_icmplt a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPGT, a_lbl.label], @dummy.single {if_icmpgt a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPLE, a_lbl.label], @dummy.single {if_icmple a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPGE, a_lbl.label], @dummy.single {if_icmpge a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IFNULL, a_lbl.label], @dummy.single {ifnull a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::IFNONNULL, a_lbl.label], @dummy.single {ifnonnull a_lbl})
+    assert_equal([:visit_jump_insn, Opcodes::JSR, a_lbl.label], @dummy.single {jsr a_lbl})
+    
+    assert_equal([:visit_jump_insn, Opcodes::GOTO, a_lbl.label], @dummy.single {goto :a})
+    assert_equal([:visit_jump_insn, Opcodes::IFEQ, a_lbl.label], @dummy.single {ifeq :a})
+    assert_equal([:visit_jump_insn, Opcodes::IFNE, a_lbl.label], @dummy.single {ifne :a})
+    assert_equal([:visit_jump_insn, Opcodes::IFLE, a_lbl.label], @dummy.single {ifle :a})
+    assert_equal([:visit_jump_insn, Opcodes::IFLT, a_lbl.label], @dummy.single {iflt :a})
+    assert_equal([:visit_jump_insn, Opcodes::IFGE, a_lbl.label], @dummy.single {ifge :a})
+    assert_equal([:visit_jump_insn, Opcodes::IFGT, a_lbl.label], @dummy.single {ifgt :a})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ACMPEQ, a_lbl.label], @dummy.single {if_acmpeq :a})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ACMPNE, a_lbl.label], @dummy.single {if_acmpne :a})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPEQ, a_lbl.label], @dummy.single {if_icmpeq :a})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPNE, a_lbl.label], @dummy.single {if_icmpne :a})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPLT, a_lbl.label], @dummy.single {if_icmplt :a})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPGT, a_lbl.label], @dummy.single {if_icmpgt :a})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPLE, a_lbl.label], @dummy.single {if_icmple :a})
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPGE, a_lbl.label], @dummy.single {if_icmpge :a})
+    assert_equal([:visit_jump_insn, Opcodes::IFNULL, a_lbl.label], @dummy.single {ifnull :a})
+    assert_equal([:visit_jump_insn, Opcodes::IFNONNULL, a_lbl.label], @dummy.single {ifnonnull :a})
+    assert_equal([:visit_jump_insn, Opcodes::JSR, a_lbl.label], @dummy.single {jsr :a})
+    
+    assert_equal([:visit_label, a_lbl.label], @dummy.single {a_lbl.set!})
   end
 
   def test_multidim_array
@@ -315,11 +339,17 @@ class TestBytecode < Test::Unit::TestCase
   end
   
   def test_lookup_switch
-    assert_equal([:visit_lookup_switch_insn, :a, :b, :c], @dummy.single {lookupswitch :a, :b, :c})
+    a_lbl = label :a
+    b_lbl = label :b
+    assert_equal([:visit_lookup_switch_insn, a_lbl.label, [1], [b_lbl.label]], @dummy.single {lookupswitch :a, [1], [:b]})
+    assert_equal([:visit_lookup_switch_insn, a_lbl.label, [1], [b_lbl.label]], @dummy.single {lookupswitch a_lbl, [1], [b_lbl]})
   end
   
   def test_table_switch
-    assert_equal([:visit_table_switch_insn, :a, :b, :c, :d], @dummy.single {tableswitch :a, :b, :c, :d})
+    a_lbl = label :a
+    b_lbl = label :b
+    assert_equal([:visit_table_switch_insn, 0, 1, a_lbl.label, [b_lbl.label]], @dummy.single {tableswitch 0, 1, :a, [:b]})
+    assert_equal([:visit_table_switch_insn, 0, 1, a_lbl.label, [b_lbl.label]], @dummy.single {tableswitch 0, 1, a_lbl, [b_lbl]})
   end
   
   def test_label
@@ -590,10 +620,14 @@ class TestBytecode < Test::Unit::TestCase
   end
   
   def test_lookup_switch_deltas
-    assert_equal(-1, (lookupswitch :a, :b, :c))
+    label :a
+    label :b
+    assert_equal(-1, (lookupswitch :a, [1], [:b]))
   end
   
   def test_table_switch_deltas
-    assert_equal(-1, (tableswitch :a, :b, :c, :d))
+    label :a
+    label :b
+    assert_equal(-1, (tableswitch 0, 1, :a, [:b]))
   end
 end

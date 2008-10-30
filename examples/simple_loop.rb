@@ -2,17 +2,16 @@ require 'jvmscript'
 
 include JVMScript
 
-fb = FileBuilder.build('simple_loop.rb') do
+fb = FileBuilder.build(__FILE__) do
   public_class "SimpleLoop" do
     public_static_method "main", void, string[] do
       aload 0
       push_int 0
       aaload
-      top = label
-      top.set!
+      label :top
       dup
       aprintln
-      goto top
+      goto :top
       returnvoid
     end
   end
