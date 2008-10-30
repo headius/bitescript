@@ -62,6 +62,24 @@ class TestBytecode < Test::Unit::TestCase
   def test_ldc
     assert_equal([:visit_ldc_insn, "a"], @dummy.single {ldc :a})
     assert_equal([:visit_ldc_insn, "a"], @dummy.single {ldc "a"})
+
+    assert_equal([:visit_int_insn, Opcodes::BIPUSH, -2], @dummy.single {ldc(-2)})
+    assert_equal([:visit_insn, Opcodes::ICONST_M1], @dummy.single {ldc(-1)})
+    assert_equal([:visit_insn, Opcodes::ICONST_0], @dummy.single {ldc(0)})
+    assert_equal([:visit_insn, Opcodes::ICONST_1], @dummy.single {ldc(1)})
+    assert_equal([:visit_insn, Opcodes::ICONST_2], @dummy.single {ldc(2)})
+    assert_equal([:visit_insn, Opcodes::ICONST_3], @dummy.single {ldc(3)})
+    assert_equal([:visit_insn, Opcodes::ICONST_4], @dummy.single {ldc(4)})
+    assert_equal([:visit_insn, Opcodes::ICONST_5], @dummy.single {ldc(5)})
+    assert_equal([:visit_int_insn, Opcodes::BIPUSH, 6], @dummy.single {ldc(6)})
+
+    assert_equal([:visit_int_insn, Opcodes::SIPUSH, -129], @dummy.single {ldc(-129)})
+    assert_equal([:visit_int_insn, Opcodes::SIPUSH, 128], @dummy.single {ldc(128)})
+    assert_equal([:visit_ldc_insn, -65537], @dummy.single {ldc(-65537)})
+    assert_equal([:visit_ldc_insn, 65536], @dummy.single {ldc(65536)})
+    assert_equal([:visit_ldc_insn, java.lang.Integer::MIN_VALUE - 1], @dummy.single {ldc(java.lang.Integer::MIN_VALUE - 1)})
+    assert_equal([:visit_ldc_insn, java.lang.Integer::MAX_VALUE + 1], @dummy.single {ldc(java.lang.Integer::MAX_VALUE + 1)})
+    
     assert_equal([:visit_ldc_insn, java.lang.Integer.new(1)], @dummy.single {ldc_int 1})
     assert_equal([:visit_ldc_insn, java.lang.Long.new(1)], @dummy.single {ldc_long 1})
     assert_equal([:visit_ldc_insn, java.lang.Float.new(1)], @dummy.single {ldc_float 1})
@@ -86,6 +104,8 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_int_insn, Opcodes::SIPUSH, 128], @dummy.single {push_int(128)})
     assert_equal([:visit_ldc_insn, -65537], @dummy.single {push_int(-65537)})
     assert_equal([:visit_ldc_insn, 65536], @dummy.single {push_int(65536)})
+    assert_equal([:visit_ldc_insn, java.lang.Integer::MIN_VALUE - 1], @dummy.single {push_int(java.lang.Integer::MIN_VALUE - 1)})
+    assert_equal([:visit_ldc_insn, java.lang.Integer::MAX_VALUE + 1], @dummy.single {push_int(java.lang.Integer::MAX_VALUE + 1)})
   end
   
   def test_method_insns
@@ -287,6 +307,7 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_jump_insn, Opcodes::IFNULL, lbl.label], @dummy.single {ifnull lbl})
     assert_equal([:visit_jump_insn, Opcodes::IFNONNULL, lbl.label], @dummy.single {ifnonnull lbl})
     assert_equal([:visit_jump_insn, Opcodes::JSR, lbl.label], @dummy.single {jsr lbl})
+    assert_equal([:visit_label, lbl.label], @dummy.single {lbl.set!})
   end
 
   def test_multidim_array
@@ -309,8 +330,7 @@ class TestBytecode < Test::Unit::TestCase
   def test_aprintln
     aprintln
     assert_equal(
-      [ [:visit_insn, Opcodes::DUP],
-        [:visit_field_insn, Opcodes::GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;"],
+      [ [:visit_field_insn, Opcodes::GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;"],
         [:visit_insn, Opcodes::SWAP],
         [ :visit_method_insn,
           Opcodes::INVOKEVIRTUAL,

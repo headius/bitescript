@@ -72,13 +72,21 @@ module JVMScript
         def ldc_double(value); method_visitor.visit_ldc_insn(java.lang.Double.new(value)); 2; end
         line = __LINE__; eval "
             def #{const_down}(value)
-              value = value.to_s if Symbol === value
-              method_visitor.visit_ldc_insn(value)
-              if Fixnum === value || Float === value
-                2
+              size = 1
+
+              case value
+              when Symbol
+                method_visitor.visit_ldc_insn value.to_s
+              when Fixnum
+                size = push_int value
+              when Float
+                size = 2
+                method_visitor.visit_ldc_insn(value)
               else
-                1
+                method_visitor.visit_ldc_insn(value)
               end
+
+              size
             end
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
@@ -286,7 +294,6 @@ module JVMScript
     end
     
     def println(type = JObject)
-      dup
       getstatic JSystem, "out", JPrintStream
       swap
       invokevirtual JPrintStream, "println", [JVoid::TYPE, type]
