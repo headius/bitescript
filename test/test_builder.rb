@@ -28,6 +28,25 @@ class TestBuilder < Test::Unit::TestCase
     assert_equal(constructor.local('another'), 1)
   end
 
+  def test_native_method
+    cb = @builder.public_class('Foo', @builder.object);
+    
+    body_called = false
+    cb.public_native_method("yoohoo") {body_called = true}
+
+    assert !body_called
+
+    cons = cb.public_constructor {aload local 'this'; invokespecial object, '<init>', [void]; returnvoid}
+
+    class_bytes = cb.generate
+    File.open('Foo.class', 'w') {|f| f.write(class_bytes)}
+    cls = JRuby.runtime.jruby_class_loader.define_class('Foo', class_bytes.to_java_bytes)
+
+    obj = cls.new_instance
+    # expect NativeException (UnsatisfiedLinkError)
+    assert_raises(NativeException) {obj.yoohoo}
+  end
+
   def test_file_builder
     builder = JVMScript::FileBuilder.build("somefile.source") do
       package "org.awesome", "stuff" do

@@ -212,9 +212,7 @@ module JVMScript
       # instance methods; also defines a "this" local at index 0
       eval "
         def #{modifier}_method(name, *signature, &block)
-          m = method(Opcodes::ACC_#{modifier.upcase}, name, signature, &block)
-          m.local 'this'
-          m
+          method(Opcodes::ACC_#{modifier.upcase}, name, signature, &block)
         end
       ", binding, __FILE__, __LINE__
       # static methods
@@ -223,12 +221,16 @@ module JVMScript
           method(Opcodes::ACC_STATIC | Opcodes::ACC_#{modifier.upcase}, name, signature, &block)
         end
       ", binding, __FILE__, __LINE__
+      # native methods
+      eval "
+        def #{modifier}_native_method(name, *signature)
+          method(Opcodes::ACC_NATIVE | Opcodes::ACC_#{modifier.upcase}, name, signature)
+        end
+      ", binding, __FILE__, __LINE__
       # constructors; also defines a "this" local at index 0
       eval "
-          def #{modifier}_constructor(*signature, &block)
-          m = method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], &block)
-          m.local 'this'
-          m
+        def #{modifier}_constructor(*signature, &block)
+          method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], &block)
         end
       ", binding, __FILE__, __LINE__
     end
@@ -242,6 +244,9 @@ module JVMScript
         methods[name] ||= {}
         methods[name][signature[1..-1]] = mb
       end
+
+      # non-static methods reserve index 0 for 'this'
+      mb.local 'this' if (flags & Opcodes::ACC_STATIC) == 0
       
       if block_given?
         mb.start
