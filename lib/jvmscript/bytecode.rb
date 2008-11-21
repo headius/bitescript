@@ -172,7 +172,7 @@ module JVMScript
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
           
-      when "NEW", "ANEWARRAY", "NEWARRAY", "INSTANCEOF", "CHECKCAST"
+      when "NEW", "ANEWARRAY", "INSTANCEOF", "CHECKCAST"
         # type instructions
         line = __LINE__; eval "
             def #{const_down}(type)
@@ -180,6 +180,27 @@ module JVMScript
               #{OpcodeStackDeltas[const_name]}
             end
           ", b, __FILE__, line
+        OpcodeInstructions[const_name] = const_down
+
+      when "NEWARRAY"
+        # newaray has its own peculiarities
+        {
+          :boolean => 'Opcodes::T_BOOLEAN',
+          :byte => 'Opcodes::T_BYTE',
+          :short => 'Opcodes::T_SHORT',
+          :char => 'Opcodes::T_CHAR',
+          :int => 'Opcodes::T_INT',
+          :long => 'Opcodes::T_LONG',
+          :float => 'Opcodes::T_FLOAT',
+          :double => 'Opcodes::T_DOUBLE'
+        }.each do |type, op_type|
+          line = __LINE__; eval "
+              def new#{type}array()
+                method_visitor.visit_int_insn(Opcodes::#{const_name}, #{op_type})
+                #{OpcodeStackDeltas[const_name]}
+              end
+            ", b, __FILE__, line
+        end
         OpcodeInstructions[const_name] = const_down
           
       when "GETFIELD", "PUTFIELD", "GETSTATIC", "PUTSTATIC"

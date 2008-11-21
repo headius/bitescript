@@ -82,6 +82,62 @@ class TestBuilder < Test::Unit::TestCase
     assert_raises(NativeException) {obj.yoohoo}
   end
 
+  def test_newarray_methods
+    cb = @builder.public_class(@class_name, @builder.object);
+
+    cb.public_method("newbooleanarray", cb.boolean[]) {ldc 5; newbooleanarray; areturn}
+    cb.public_method("newbytearray", cb.byte[]) {ldc 5; newbytearray; areturn}
+    cb.public_method("newshortarray", cb.short[]) {ldc 5; newshortarray; areturn}
+    cb.public_method("newchararray", cb.char[]) {ldc 5; newchararray; areturn}
+    cb.public_method("newintarray", cb.int[]) {ldc 5; newintarray; areturn}
+    cb.public_method("newlongarray", cb.long[]) {ldc 5; newlongarray; areturn}
+    cb.public_method("newfloatarray", cb.float[]) {ldc 5; newfloatarray; areturn}
+    cb.public_method("newdoublearray", cb.double[]) {ldc 5; newdoublearray; areturn}
+
+    dummy_constructor(cb)
+    obj = load_and_construct(@class_name, cb);
+    
+    ary = obj.newbooleanarray
+    assert_equal(Java::boolean.java_class, ary.class.java_class.component_type)
+    assert_equal(5, ary.size)
+    assert_equal([false,false,false,false,false], ary.to_a)
+
+    ary = obj.newbytearray
+    assert_equal(Java::byte.java_class, ary.class.java_class.component_type)
+    assert_equal(5, ary.size)
+    assert_equal([0,0,0,0,0], ary.to_a)
+
+    ary = obj.newshortarray
+    assert_equal(Java::short.java_class, ary.class.java_class.component_type)
+    assert_equal(5, ary.size)
+    assert_equal([0,0,0,0,0], ary.to_a)
+
+    ary = obj.newchararray
+    assert_equal(Java::char.java_class, ary.class.java_class.component_type)
+    assert_equal(5, ary.size)
+    assert_equal([0,0,0,0,0], ary.to_a)
+
+    ary = obj.newintarray
+    assert_equal(Java::int.java_class, ary.class.java_class.component_type)
+    assert_equal(5, ary.size)
+    assert_equal([0,0,0,0,0], ary.to_a)
+
+    ary = obj.newlongarray
+    assert_equal(Java::long.java_class, ary.class.java_class.component_type)
+    assert_equal(5, ary.size)
+    assert_equal([0,0,0,0,0], ary.to_a)
+
+    ary = obj.newfloatarray
+    assert_equal(Java::float.java_class, ary.class.java_class.component_type)
+    assert_equal(5, ary.size)
+    assert_equal([0.0,0.0,0.0,0.0,0.0], ary.to_a)
+
+    ary = obj.newdoublearray
+    assert_equal(Java::double.java_class, ary.class.java_class.component_type)
+    assert_equal(5, ary.size)
+    assert_equal([0.0,0.0,0.0,0.0,0.0], ary.to_a)
+  end
+
   def test_file_builder
     builder = JVMScript::FileBuilder.build("somefile.source") do
       package "org.awesome", "stuff" do

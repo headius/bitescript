@@ -271,9 +271,19 @@ class TestBytecode < Test::Unit::TestCase
   def test_type_insns
     assert_equal([:visit_type_insn, Opcodes::NEW, :a], @dummy.single {new :a})
     assert_equal([:visit_type_insn, Opcodes::ANEWARRAY, :a], @dummy.single {anewarray :a})
-    assert_equal([:visit_type_insn, Opcodes::NEWARRAY, :a], @dummy.single {newarray :a})
     assert_equal([:visit_type_insn, Opcodes::INSTANCEOF, :a], @dummy.single {instanceof :a})
     assert_equal([:visit_type_insn, Opcodes::CHECKCAST, :a], @dummy.single {checkcast :a})
+  end
+
+  def test_newarray_insns
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_BOOLEAN], @dummy.single {newbooleanarray})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_BYTE], @dummy.single {newbytearray})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_SHORT], @dummy.single {newshortarray})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_CHAR], @dummy.single {newchararray})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_INT], @dummy.single {newintarray})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_LONG], @dummy.single {newlongarray})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_FLOAT], @dummy.single {newfloatarray})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_DOUBLE], @dummy.single {newdoublearray})
   end
   
   def test_field_insns
@@ -581,9 +591,19 @@ class TestBytecode < Test::Unit::TestCase
   def test_type_insns_deltas
     assert_equal(1, (new :a))
     assert_equal(0, (anewarray :a))
-    assert_equal(0, (newarray :a))
     assert_equal(0, (instanceof :a))
     assert_equal(0, (checkcast :a))
+  end
+
+  def test_newarray_insn_deltas
+    assert_equal(0, (newbooleanarray))
+    assert_equal(0, (newbytearray))
+    assert_equal(0, (newshortarray))
+    assert_equal(0, (newchararray))
+    assert_equal(0, (newintarray))
+    assert_equal(0, (newlongarray))
+    assert_equal(0, (newfloatarray))
+    assert_equal(0, (newdoublearray))
   end
   
   def test_field_insns_deltas
