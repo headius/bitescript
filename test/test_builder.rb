@@ -299,6 +299,28 @@ class TestBuilder < Test::Unit::TestCase
     assert_raises(NativeException) {obj.yoohoo}
   end
 
+  def test_fields
+    cb = @builder.public_class(@class_name, @builder.object);
+
+    cb.public_field('inst_field', JString)
+    cb.public_static_field('static_field', JString)
+
+    cb.public_method('set_inst', cb.void) {aload 0; ldc 'instance'; putfield this, 'inst_field', JString; returnvoid}
+    cb.public_method('set_static', cb.void) {ldc 'static'; putstatic this, 'static_field', JString; returnvoid}
+    cb.public_method('get_inst', JString) {aload 0; getfield this, 'inst_field', JString; areturn}
+    cb.public_method('get_static', JString) {getstatic this, 'static_field', JString; areturn}
+
+    dummy_constructor(cb)
+    obj = load_and_construct(@class_name, cb);
+
+    assert_equal nil, obj.get_inst
+    assert_equal nil, obj.get_static
+    obj.set_inst
+    obj.set_static
+    assert_equal 'instance', obj.get_inst
+    assert_equal 'static', obj.get_static
+  end
+
   def test_arrays
     cb = @builder.public_class(@class_name, @builder.object);
 

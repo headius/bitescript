@@ -7,9 +7,11 @@ module JVMScript
     include Signature
 
     begin
+      # try mangled names for the version included with JRuby
       import "jruby.objectweb.asm.Opcodes"
       import "jruby.objectweb.asm.Label"
     rescue Exception
+      # fall back on standard names
       import "org.objectweb.asm.Opcodes"
       import "org.objectweb.asm.Label"
     end
