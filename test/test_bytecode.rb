@@ -186,7 +186,6 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_insn, Opcodes::IRETURN], @dummy.single {ireturn})
     assert_equal([:visit_insn, Opcodes::IADD], @dummy.single {iadd})
     assert_equal([:visit_insn, Opcodes::ISUB], @dummy.single {isub})
-    assert_equal([:visit_insn, Opcodes::IINC], @dummy.single {iinc})
     assert_equal([:visit_insn, Opcodes::IDIV], @dummy.single {idiv})
     assert_equal([:visit_insn, Opcodes::IMUL], @dummy.single {imul})
     assert_equal([:visit_insn, Opcodes::INEG], @dummy.single {ineg})
@@ -203,6 +202,10 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_insn, Opcodes::I2C], @dummy.single {i2c})
     assert_equal([:visit_insn, Opcodes::I2D], @dummy.single {i2d})
     assert_equal([:visit_insn, Opcodes::I2F], @dummy.single {i2f})
+  end
+
+  def test_iinc_insn
+    assert_equal([:visit_iinc_insn, 0, 1], @dummy.single {iinc 0, 1})
   end
 
   def test_long_insns
@@ -506,7 +509,7 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal(-1, (ireturn))
     assert_equal(-1, (iadd))
     assert_equal(-1, (isub))
-    assert_equal(0, (iinc))
+    assert_equal(0, (iinc 0, 1))
     assert_equal(-1, (idiv))
     assert_equal(-1, (imul))
     assert_equal(0, (ineg))

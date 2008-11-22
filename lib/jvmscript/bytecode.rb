@@ -40,7 +40,7 @@ module JVMScript
     %w[AASTORE BASTORE CASTORE SASTORE IASTORE LCMP FASTORE DCMPL DCMPG].each {|opcode| OpcodeStackDeltas[opcode] = -3}
     %w[LASTORE DASTORE].each {|opcode| OpcodeStackDeltas[opcode] = -4}
     %w[RETURN SWAP NOP ARRAYLENGTH IINC INEG IUSHR ISHL ISHR I2S I2F I2B I2C
-       LALOAD LSHL LSHR LUSHR LINC LNEG L2D FNEG F2I DALOAD D2L DNEG RET
+       LALOAD LSHL LSHR LUSHR LNEG L2D FNEG F2I DALOAD D2L DNEG RET
        CHECKCAST ANEWARRAY NEWARRAY GOTO INSTANCEOF].each {|opcode| OpcodeStackDeltas[opcode] = 0}
     
     OpcodeInstructions = {}
@@ -154,7 +154,7 @@ module JVMScript
           "CALOAD", "CASTORE",
           "SALOAD", "SASTORE",
           "ICONST_M1", "ICONST_0", "ICONST_1", "ICONST_2", "ICONST_3", "ICONST_4", "ICONST_5", "IRETURN", "IALOAD",
-          "IADD", "IINC", "ISUB", "IDIV", "IMUL", "INEG", "IAND", "IOR", "IXOR", "IASTORE",
+          "IADD", "ISUB", "IDIV", "IMUL", "INEG", "IAND", "IOR", "IXOR", "IASTORE",
           "IUSHR", "ISHL", "ISHR", "I2L", "I2S", "I2F", "I2D", "I2B", "IREM", "I2C",
           "LCONST_0", "LCONST_1", "LRETURN", "LALOAD", "LASTORE", "LCMP", "LSHL", "LSHR", "LREM", "LUSHR",
           "LADD", "LINC", "LSUB", "LDIV", "LMUL", "LNEG", "LAND", "LOR", "LXOR", "L2I", "L2F", "L2D",
@@ -171,6 +171,13 @@ module JVMScript
             end
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
+
+      when "IINC"
+        def iinc(index, value)
+          method_visitor.visit_iinc_insn(index, value)
+          0
+        end
+        OpcodeInstructions[const_name] = 'iinc'
           
       when "NEW", "ANEWARRAY", "INSTANCEOF", "CHECKCAST"
         # type instructions
@@ -260,10 +267,11 @@ module JVMScript
               lbl.label
             end
           end
+          raise "Default case must be provided" unless default
           if default && Symbol === default
             default = sym_to_label(default)
           end
-          method_visitor.visit_lookup_switch_insn(default.label, ints, case_labels)
+          method_visitor.visit_lookup_switch_insn(default.label, ints.to_java(:int), case_labels.to_java(org.objectweb.asm.Label))
           -1
         end
         OpcodeInstructions['LOOKUPSWITCH'] = 'lookupswitch'
@@ -278,10 +286,11 @@ module JVMScript
               lbl.label
             end
           end
+          raise "Default case must be provided" unless default
           if default && Symbol === default
             default = sym_to_label(default)
           end
-          method_visitor.visit_table_switch_insn(min, max, default.label, case_labels)
+          method_visitor.visit_table_switch_insn(min, max, default.label, case_labels.to_java(org.objectweb.asm.Label))
           -1
         end
         OpcodeInstructions['TABLESWITCH'] = 'tableswitch'
@@ -317,7 +326,7 @@ module JVMScript
       to = sym_to_label(to) if Symbol === to
       target = sym_to_label(target) if Symbol === target
       
-      method_visitor.visit_try_catch_block(from.label, to.label, target.label, path(type))
+      method_visitor.visit_try_catch_block(from.label, to.label, target.label, type ? path(type) : nil)
     end
     
     class SmartLabel
