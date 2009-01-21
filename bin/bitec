@@ -1,0 +1,22 @@
+#!/usr/bin/env jruby
+
+$: << File.dirname(File.dirname(__FILE__)) + "/lib"
+
+require 'bitescript'
+
+file = ARGV[0]
+
+raise "usage: bite <script>" unless file
+
+content = File.read(file)
+fb = BiteScript::FileBuilder.build(file) do
+  name = file[0..file.rindex('.') - 1]
+  public_class name do
+    eval content, binding, file, 1
+  end
+end
+
+fb.generate do |filename, classbuilder|
+  bytes = classbuilder.generate
+  File.open(filename, 'w') {|f| f.write(bytes)}
+end

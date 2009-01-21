@@ -23,7 +23,7 @@ macro :end_timing do |i|
   lstore 2
 end
 
-macro :load_times
+macro :load_times do
   aload 0
   ldc 0
   aaload # number of times
