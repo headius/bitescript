@@ -1,0 +1,79 @@
+System = java.lang.System
+JInteger = java.lang.Integer
+
+macro :lprintln do |i|
+  getstatic System, "out", java.io.PrintStream
+  lload i
+  invokevirtual java.io.PrintStream, "println", [void, long]
+end
+
+macro :load_time do
+  invokestatic System, "currentTimeMillis", long
+end
+
+macro :start_timing do |i|
+  load_time
+  lstore i
+end
+
+macro :end_timing do |i|
+  load_time
+  lload 2
+  lsub
+  lstore 2
+end
+
+macro :load_times
+  aload 0
+  ldc 0
+  aaload # number of times
+  invokestatic JInteger, 'parseInt', [int, string]
+end
+
+main do
+  load_times
+  istore 1
+
+  ldc "Raw bytecode fib(45) performance:"
+  aprintln
+
+  label :top
+  iload 1
+  done = label
+  ifeq done
+  iinc 1, -1
+
+  start_timing 2
+  ldc 45
+  invokestatic this, "fib", [int, int]
+  pop
+  end_timing 2
+
+  ldc "Time: "
+  aprintln
+  lprintln 2
+  goto :top
+
+  done.set!
+  returnvoid
+end
+
+public_static_method "fib", int, int do
+  iload 0
+  ldc 2
+  recurse = label
+  if_icmpge recurse
+  iload 0
+  ireturn
+  recurse.set!
+  iload 0
+  ldc 1
+  isub
+  invokestatic this, "fib", [int, int]
+  iload 0
+  ldc 2
+  isub
+  invokestatic this, "fib", [int, int]
+  iadd
+  ireturn
+end
