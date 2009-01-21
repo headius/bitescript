@@ -1,6 +1,6 @@
-require 'jvmscript'
+require 'bitescript'
 
-include JVMScript
+include BiteScript
 
 fb = FileBuilder.build(__FILE__) do
   public_class "SimpleLoop" do

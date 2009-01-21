@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'jvmscript/signature'
+require 'bitescript/signature'
 
 class TestSignature < Test::Unit::TestCase
   include Java
@@ -15,7 +15,7 @@ class TestSignature < Test::Unit::TestCase
   import java.lang.Double
   import java.lang.Void
 
-  Signature = JVMScript::Signature
+  Signature = BiteScript::Signature
   
   def test_classname
     assert_equal("java.util.ArrayList", Signature.classname("java/util/ArrayList"))

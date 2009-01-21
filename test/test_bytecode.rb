@@ -1,8 +1,8 @@
 require 'test/unit'
-require 'jvmscript/bytecode'
+require 'bitescript/bytecode'
 
 class TestBytecode < Test::Unit::TestCase
-  include JVMScript::Bytecode
+  include BiteScript::Bytecode
 
   begin
     import "jruby.objectweb.asm.Opcodes"

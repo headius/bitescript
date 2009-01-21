@@ -1,0 +1,32 @@
+#!/usr/bin/env jruby
+
+$: << File.dirname(File.dirname(__FILE__)) + "/lib"
+
+require 'bitescript'
+
+file = ARGV[0]
+
+raise "usage: bite <script>" unless file
+
+content = File.read(file)
+fb = BiteScript::FileBuilder.build(file) do
+  public_class "BiteScriptCLI" do
+    eval content, binding, file, 1
+  end
+end
+
+fb.generate do |filename, classbuilder|
+  bytes = classbuilder.generate
+
+  cl = org.jruby.util.JRubyClassLoader.new(java.lang.ClassLoader.system_class_loader)
+  cls = cl.define_class(filename[0, -7], bytes.to_java_bytes)
+  
+  begin
+    main = cls.get_method("main", [java.lang.String[]].to_java(java.lang.Class))
+    args = ARGV[1..-1] || []
+    main.invoke(nil, [args.to_java(:string)].to_java)
+  rescue NativeException => x
+    x = x.cause while x.cause
+    x.print_stack_trace
+  end
+end

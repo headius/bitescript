@@ -1,6 +1,6 @@
 require 'java'
 
-module JVMScript
+module BiteScript
   module JavaTypes
     import java.lang.Object
     import java.lang.Byte

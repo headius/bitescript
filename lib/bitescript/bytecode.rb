@@ -1,6 +1,6 @@
-require 'jvmscript/signature'
+require 'bitescript/signature'
 
-module JVMScript
+module BiteScript
   # Bytecode is a simple adapter around an ASM MethodVisitor that makes it look like
   # JVM assembly code. Included classes must just provide a method_visitor accessor
   module Bytecode

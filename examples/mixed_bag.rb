@@ -1,11 +1,11 @@
 require 'java'
 require 'jruby'
-require 'jvmscript'
+require 'bitescript'
 
 import java.util.ArrayList
 
 # Construct a class that uses several JVM opcodes and method types
-builder = JVMScript::FileBuilder.build("somefile.source") do
+builder = BiteScript::FileBuilder.build("somefile.source") do
   package "org.awesome", "stuff" do
     public_class "MyClass", object do
       public_field "list", ArrayList
@@ -69,5 +69,5 @@ builder.generate do |name, builder|
   bytes = builder.generate
   cls = loader.define_class(name[0..-7].gsub('/', '.'), bytes.to_java_bytes)
   MyClass = JavaUtilities.get_proxy_class(cls.name)
-  MyClass.main(['hello, jvmscript'].to_java :string)
+  MyClass.main(['hello, BiteScript'].to_java :string)
 end

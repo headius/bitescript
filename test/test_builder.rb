@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'jvmscript/builder'
+require 'bitescript/builder'
 
 class TestBuilder < Test::Unit::TestCase
   JLong = java.lang.Long
@@ -11,7 +11,7 @@ class TestBuilder < Test::Unit::TestCase
   end
 
   def setup
-    @builder = JVMScript::FileBuilder.build('somefile.source')
+    @builder = BiteScript::FileBuilder.build('somefile.source')
     @class_name = new_class_name
   end
 

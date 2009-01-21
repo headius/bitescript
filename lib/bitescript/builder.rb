@@ -1,8 +1,8 @@
-require 'jvmscript/bytecode'
-require 'jvmscript/signature'
+require 'bitescript/bytecode'
+require 'bitescript/signature'
 require 'fileutils'
 
-module JVMScript
+module BiteScript
   module Util
     def type_from_dotted(dotted_name)
       JavaUtilities.get_proxy_class(dotted_name).java_class
@@ -265,6 +265,12 @@ module JVMScript
       method or raise NameError.new("failed to find method #{name}#{sig(params)} on #{self}")
     end
 
+    def main(&b)
+      raise "already defined main" if methods[name]
+
+      public_static_method "main", void, string[], &b
+    end
+
     def constructor(*params)
       constructors[params] or raise NameError.new("failed to find constructor #{sig(params)} on #{self}")
     end
@@ -300,6 +306,10 @@ module JVMScript
     def new_method(modifiers, name, signature)
       @class_writer.visit_method(modifiers, name, sig(*signature), nil, nil)
     end
+
+    def macro(name, &b)
+      MethodBuilder.send :define_method, name, &b
+    end
   end
   
   class MethodBuilder
@@ -310,7 +320,7 @@ module JVMScript
     end
 
     include QuickTypes
-    include JVMScript::Bytecode
+    include BiteScript::Bytecode
     
     attr_reader :method_visitor
     attr_reader :static

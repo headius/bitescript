@@ -1,7 +1,7 @@
 $:.unshift File.join(File.dirname(__FILE__),'..','lib')
 
 require 'test/unit'
-require 'jvmscript'
+require 'bitescript'
 
 class TestJavaClass < Test::Unit::TestCase
   def test_constructor
@@ -15,7 +15,7 @@ class TestJavaClass < Test::Unit::TestCase
     assert_equal [], cons1.parameter_types
     assert_equal [java.lang.String.java_class], cons2.parameter_types
 
-    cls = JVMScript::FileBuilder.new('x').public_class('y')
+    cls = BiteScript::FileBuilder.new('x').public_class('y')
     cls.public_constructor()
     cls.public_constructor(java.lang.String.java_class)
 
@@ -41,7 +41,7 @@ class TestJavaClass < Test::Unit::TestCase
     assert_equal [], m1.parameter_types
     assert_equal [java.lang.Object.java_class], m2.parameter_types
 
-    cls = JVMScript::FileBuilder.new('x').public_class('y')
+    cls = BiteScript::FileBuilder.new('x').public_class('y')
     cls.public_method('toString', java.lang.String.java_class)
     cls.public_method('equals', Java::boolean.java_class, java.lang.Object.java_class)
 
