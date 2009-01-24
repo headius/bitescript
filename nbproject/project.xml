@@ -3,13 +3,13 @@
     <type>org.netbeans.modules.ruby.rubyproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/ruby-project/1">
-            <name>JVMScript</name>
+            <name>BiteScript</name>
             <source-roots>
                 <root id="src.examples.dir"/>
-                <root id="src.dir"/>
+                <root id="src.lib.dir"/>
             </source-roots>
             <test-roots>
-                <root id="test.src.dir"/>
+                <root id="test.test.dir"/>
             </test-roots>
         </data>
     </configuration>
