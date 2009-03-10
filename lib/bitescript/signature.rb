@@ -20,9 +20,15 @@ module BiteScript
     module_function :classname
     
     def path(cls)
-      return cls if Symbol === cls
-      cls = cls.java_class if Class === cls
-      cls.name.gsub('.', '/')
+      case cls
+      when Symbol
+        return cls
+      when Class, Module
+        cls_name = cls.java_class.to_s || cls.java_class.name
+      else
+        cls_name = cls.name
+      end
+      cls_name.gsub('.', '/')
     end
     module_function :path
     
@@ -34,7 +40,7 @@ module BiteScript
       end
       
       if Module === cls
-        return "L#{cls.java_class};"
+        return "L#{path(cls)};"
       end
       
       if cls.array?

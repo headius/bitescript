@@ -234,6 +234,10 @@ module BiteScript
         end
       ", binding, __FILE__, __LINE__
     end
+
+    def static_init(&block)
+      method(Opcodes::ACC_STATIC, "<clinit>", [void], &block)
+    end
     
     def method(flags, name, signature, &block)
       mb = MethodBuilder.new(self, flags, name, signature)

@@ -14,11 +14,20 @@ class TestSignature < Test::Unit::TestCase
   import java.lang.Float
   import java.lang.Double
   import java.lang.Void
+  import java.util.List
 
   Signature = BiteScript::Signature
   
   def test_classname
     assert_equal("java.util.ArrayList", Signature.classname("java/util/ArrayList"))
+  end
+
+  def test_interface_path
+    assert_equal("java/util/List", Signature.path(List))
+  end
+
+  def test_interface_class_id
+    assert_equal("Ljava/util/List;", Signature.class_id(List))
   end
   
   def test_path

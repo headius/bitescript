@@ -384,4 +384,16 @@ class TestBuilder < Test::Unit::TestCase
 
     assert_equal 5, try(Java::int) {ldc 5; newintarray; arraylength; ireturn}
   end
+
+  def test_static_init
+    cb = @builder.public_class(@class_name, @builder.object);
+
+    cb.public_static_field('static_field', JString)
+    cb.static_init {ldc "hello world"; putstatic this, "static_field", string; returnvoid}
+
+    dummy_constructor(cb)
+    obj = load_and_construct(@class_name, cb);
+
+    assert_equal("hello world", obj.class.static_field)
+  end
 end
