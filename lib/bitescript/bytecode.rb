@@ -82,8 +82,7 @@ module BiteScript
               when Fixnum
                 size = push_int value
               when Float
-                size = 2
-                method_visitor.visit_ldc_insn(value)
+                ldc_double(value)
               else
                 method_visitor.visit_ldc_insn(value)
               end

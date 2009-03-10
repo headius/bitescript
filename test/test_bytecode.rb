@@ -6,8 +6,10 @@ class TestBytecode < Test::Unit::TestCase
 
   begin
     import "jruby.objectweb.asm.Opcodes"
+    asm_package = jruby.objectweb.asm
   rescue
     import "org.objectweb.asm.Opcodes"
+    asm_package = org.objectweb.asm
   end
   
   import java.lang.System
@@ -84,6 +86,7 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_ldc_insn, java.lang.Long.new(1)], @dummy.single {ldc_long 1})
     assert_equal([:visit_ldc_insn, java.lang.Float.new(1)], @dummy.single {ldc_float 1})
     assert_equal([:visit_ldc_insn, java.lang.Double.new(1)], @dummy.single {ldc_double 1})
+    assert_equal([:visit_ldc_insn, java.lang.Double.new(1)], @dummy.single {ldc(1.0)})
   end
 
   def test_int_insns
@@ -354,15 +357,35 @@ class TestBytecode < Test::Unit::TestCase
   def test_lookup_switch
     a_lbl = label :a
     b_lbl = label :b
-    assert_equal([:visit_lookup_switch_insn, a_lbl.label, [1], [b_lbl.label]], @dummy.single {lookupswitch :a, [1], [:b]})
-    assert_equal([:visit_lookup_switch_insn, a_lbl.label, [1], [b_lbl.label]], @dummy.single {lookupswitch a_lbl, [1], [b_lbl]})
+
+    # This is kinda hacky because we return a new array instance for to_java each time
+    lswitch = @dummy.single {lookupswitch :a, [1], [:b]}
+    rest, labels = lswitch[0..-3], lswitch[-2..-1]
+    assert_equal([:visit_lookup_switch_insn, a_lbl.label], rest)
+    assert_equal(1, labels[0][0])
+    assert_equal(b_lbl.label, labels[1][0])
+
+    lswitch = @dummy.single {lookupswitch a_lbl, [1], [b_lbl]}
+    rest, labels = lswitch[0..-3], lswitch[-2..-1]
+    assert_equal([:visit_lookup_switch_insn, a_lbl.label], rest)
+    assert_equal(1, labels[0][0])
+    assert_equal(b_lbl.label, labels[1][0])
   end
   
   def test_table_switch
     a_lbl = label :a
     b_lbl = label :b
-    assert_equal([:visit_table_switch_insn, 0, 1, a_lbl.label, [b_lbl.label]], @dummy.single {tableswitch 0, 1, :a, [:b]})
-    assert_equal([:visit_table_switch_insn, 0, 1, a_lbl.label, [b_lbl.label]], @dummy.single {tableswitch 0, 1, a_lbl, [b_lbl]})
+
+    # This is kinda hacky because we return a new array instance for to_java each time
+    tswitch = @dummy.single {tableswitch 0, 1, :a, [:b]}
+    rest, labels = tswitch[0..-2], tswitch[-1]
+    assert_equal([:visit_table_switch_insn, 0, 1, a_lbl.label], rest)
+    assert_equal(b_lbl.label, labels[0])
+
+    tswitch = @dummy.single {tableswitch 0, 1, a_lbl, [b_lbl]}
+    rest, labels = tswitch[0..-2], tswitch[-1]
+    assert_equal([:visit_table_switch_insn, 0, 1, a_lbl.label], rest)
+    assert_equal(b_lbl.label, labels[0])
   end
   
   def test_label
