@@ -165,7 +165,7 @@ module BiteScript
       
       interface_paths = []
       interfaces.each {|interface| interface_paths << path(interface)}
-      @class_writer.visit(Opcodes::V1_4, Opcodes::ACC_PUBLIC | Opcodes::ACC_SUPER, class_name, nil, path(superclass), interface_paths.to_java(:string))
+      @class_writer.visit(BiteScript.bytecode_version, Opcodes::ACC_PUBLIC | Opcodes::ACC_SUPER, class_name, nil, path(superclass), interface_paths.to_java(:string))
       @class_writer.visit_source(file_name, nil)
 
       @constructor = nil

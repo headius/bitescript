@@ -1,3 +1,4 @@
+require 'bitescript/asm'
 require 'bitescript/signature'
 
 module BiteScript
@@ -5,17 +6,8 @@ module BiteScript
   # JVM assembly code. Included classes must just provide a method_visitor accessor
   module Bytecode
     include Signature
+    include ASM
 
-    begin
-      # try mangled names for the version included with JRuby
-      import "jruby.objectweb.asm.Opcodes"
-      import "jruby.objectweb.asm.Label"
-    rescue Exception
-      # fall back on standard names
-      import "org.objectweb.asm.Opcodes"
-      import "org.objectweb.asm.Label"
-    end
-  
     JObject = java.lang.Object
     JSystem = java.lang.System
     JPrintStream = java.io.PrintStream
@@ -72,6 +64,7 @@ module BiteScript
         def ldc_long(value); method_visitor.visit_ldc_insn(java.lang.Long.new(value)); 2; end
         def ldc_float(value); method_visitor.visit_ldc_insn(java.lang.Float.new(value)); 1; end
         def ldc_double(value); method_visitor.visit_ldc_insn(java.lang.Double.new(value)); 2; end
+        def ldc_class(value); method_visitor.visit_ldc_insn(ASM::Type.get_type(value.java_class)); 1; end
         line = __LINE__; eval "
             def #{const_down}(value)
               size = 1
@@ -83,6 +76,8 @@ module BiteScript
                 size = push_int value
               when Float
                 ldc_double(value)
+              when Module
+                ldc_class(value)
               else
                 method_visitor.visit_ldc_insn(value)
               end
@@ -272,7 +267,7 @@ module BiteScript
           if default && Symbol === default
             default = sym_to_label(default)
           end
-          method_visitor.visit_lookup_switch_insn(default.label, ints.to_java(:int), case_labels.to_java(org.objectweb.asm.Label))
+          method_visitor.visit_lookup_switch_insn(default.label, ints.to_java(:int), case_labels.to_java(ASM::Label))
           -1
         end
         OpcodeInstructions['LOOKUPSWITCH'] = 'lookupswitch'
@@ -291,7 +286,7 @@ module BiteScript
           if default && Symbol === default
             default = sym_to_label(default)
           end
-          method_visitor.visit_table_switch_insn(min, max, default.label, case_labels.to_java(org.objectweb.asm.Label))
+          method_visitor.visit_table_switch_insn(min, max, default.label, case_labels.to_java(ASM::Label))
           -1
         end
         OpcodeInstructions['TABLESWITCH'] = 'tableswitch'
@@ -335,7 +330,7 @@ module BiteScript
       
       def initialize(method_visitor)
         @method_visitor = method_visitor
-        @label = Label.new
+        @label = ASM::Label.new
       end
       
       def set!
@@ -381,7 +376,7 @@ module BiteScript
     end
     
     def line(num)
-      method_visitor.visit_line_number num, Label.new
+      method_visitor.visit_line_number num, ASM::Label.new
     end
 
     def push_int(num)

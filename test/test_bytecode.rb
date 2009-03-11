@@ -3,14 +3,7 @@ require 'bitescript/bytecode'
 
 class TestBytecode < Test::Unit::TestCase
   include BiteScript::Bytecode
-
-  begin
-    import "jruby.objectweb.asm.Opcodes"
-    asm_package = jruby.objectweb.asm
-  rescue
-    import "org.objectweb.asm.Opcodes"
-    asm_package = org.objectweb.asm
-  end
+  include BiteScript::ASM
   
   import java.lang.System
   import java.lang.Integer
@@ -87,6 +80,8 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_ldc_insn, java.lang.Float.new(1)], @dummy.single {ldc_float 1})
     assert_equal([:visit_ldc_insn, java.lang.Double.new(1)], @dummy.single {ldc_double 1})
     assert_equal([:visit_ldc_insn, java.lang.Double.new(1)], @dummy.single {ldc(1.0)})
+
+    assert_equal([:visit_ldc_insn, BiteScript::ASM::Type.get_type(System.java_class)], @dummy.single {ldc(System)})
   end
 
   def test_int_insns
