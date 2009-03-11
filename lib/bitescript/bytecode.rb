@@ -64,7 +64,11 @@ module BiteScript
         def ldc_long(value); method_visitor.visit_ldc_insn(java.lang.Long.new(value)); 2; end
         def ldc_float(value); method_visitor.visit_ldc_insn(java.lang.Float.new(value)); 1; end
         def ldc_double(value); method_visitor.visit_ldc_insn(java.lang.Double.new(value)); 2; end
-        def ldc_class(value); method_visitor.visit_ldc_insn(ASM::Type.get_type(value.java_class)); 1; end
+        def ldc_class(value)
+          value = value.java_class unless Java::JavaClass === value
+          method_visitor.visit_ldc_insn(ASM::Type.get_type(value))
+          1
+        end
         line = __LINE__; eval "
             def #{const_down}(value)
               size = 1
