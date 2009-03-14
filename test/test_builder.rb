@@ -1,16 +1,19 @@
 require 'test/unit'
+require 'bitescript'
 require 'bitescript/builder'
 
 class TestBuilder < Test::Unit::TestCase
   JLong = java.lang.Long
   JString = java.lang.String
   System = java.lang.System
+  JRubyMethod = org.jruby.anno.JRubyMethod
   
   def new_class_name
     "Foo" + (System.nano_time + rand(JLong::MAX_VALUE)).to_s
   end
 
   def setup
+    BiteScript.bytecode_version = BiteScript::JAVA1_5
     @builder = BiteScript::FileBuilder.build('somefile.source')
     @class_name = new_class_name
   end
@@ -25,6 +28,7 @@ class TestBuilder < Test::Unit::TestCase
 
   def load_and_construct(name, class_builder)
     class_bytes = class_builder.generate
+    File.open(name + ".class", 'w') {|f| f.write(class_bytes)}
     cls = JRuby.runtime.jruby_class_loader.define_class(name, class_bytes.to_java_bytes)
 
     cls.new_instance
@@ -395,5 +399,30 @@ class TestBuilder < Test::Unit::TestCase
     obj = load_and_construct(@class_name, cb);
 
     assert_equal("hello world", obj.class.static_field)
+  end
+
+  def test_annotation
+    cb = @builder.public_class(@class_name, @builder.object);
+    
+    cb.public_method("annotated", cb.void) do
+      annotate(JRubyMethod, true) do |anno|
+        anno.name = ["foo"]
+        anno.required = 1
+        anno.optional = 1
+        anno.rest = true
+        anno.meta = true
+        anno.module = true
+        anno.frame = true
+        anno.scope = true
+      end
+      returnvoid
+    end
+    
+    dummy_constructor(cb)
+    obj = load_and_construct(@class_name, cb);
+
+    method = obj.class.java_class.declared_method("annotated")
+    anno = method.annotation(JRubyMethod.java_class)
+    assert anno
   end
 end

@@ -393,5 +393,67 @@ module BiteScript
       end
       local_index
     end
+
+    def annotate(cls, runtime = false)
+      if Java::JavaClass == cls
+        java_class = cls
+      else
+        java_class = cls.java_class
+      end
+
+      annotation = @method_visitor.visit_annotation(ci(java_class), true)
+      annotation.extend AnnotationBuilder
+
+      yield annotation
+      annotation.visit_end
+    end
+  end
+
+  module AnnotationBuilder
+    def method_missing(name, val)
+      name_str = name.to_s
+      if name_str[-1] == ?=
+        name_str = name_str[0..-2]
+        if Array === val
+          array(name_str) do |ary|
+            val.each {|x| ary.visit(nil, x)}
+          end
+        else
+          visit name_str, val
+        end
+      else
+        super
+      end
+    end
+    def value(k, v)
+      visit k, v
+    end
+    def annotation(name, cls)
+      if Java::JavaClass == cls
+        java_class = cls
+      else
+        java_class = cls.java_class
+      end
+
+      sub_annotation = visit_annotation(name, ci(java_class))
+      sub_annotation.extend AnnotationBuilder
+      yield sub_annotation
+      sub_annotation.visit_end
+    end
+    def array(name)
+      sub_annotation = visit_array(name)
+      sub_annotation.extend AnnotationBuilder
+      yield sub_annotation
+      sub_annotation.visit_end
+    end
+    def enum(name, cls, value)
+      if JavaClass == cls
+        java_class = cls
+      else
+        java_class = cls.java_class
+      end
+
+      visit_enum(name, ci(java_class), value)
+    end
   end
 end
