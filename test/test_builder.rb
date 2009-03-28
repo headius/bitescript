@@ -13,6 +13,7 @@ class TestBuilder < Test::Unit::TestCase
   end
 
   def setup
+    # Java 1.5 compat required for annotation tests
     BiteScript.bytecode_version = BiteScript::JAVA1_5
     @builder = BiteScript::FileBuilder.build('somefile.source')
     @class_name = new_class_name
