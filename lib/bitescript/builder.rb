@@ -98,7 +98,11 @@ module BiteScript
       @class_builders[class_name] ||= class_builder
       
       if block_given?
-        class_builder.instance_eval(&block)
+        if block.arity == 1
+          block.call(class_builder)
+        else
+          class_builder.instance_eval(&block)
+        end
       else
         return class_builder
       end
@@ -254,7 +258,11 @@ module BiteScript
       
       if block_given?
         mb.start
-        mb.instance_eval(&block)
+        if block.arity == 1
+          block.call(mb)
+        else
+          mb.instance_eval(&block)
+        end
         mb.stop
       end
 
@@ -360,7 +368,11 @@ module BiteScript
     def self.build(class_builder, modifiers, name, signature, &block)
       mb = MethodBuilder.new(class_builder, modifiers, name, signature)
       mb.start
-      mb.instance_eval(&block)
+      if block.arity == 1
+        block.call(mb)
+      else
+        mb.instance_eval(&block)
+      end
       mb.stop
     end
     
