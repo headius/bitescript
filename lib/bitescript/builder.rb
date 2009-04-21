@@ -91,11 +91,12 @@ module BiteScript
       end
       fb
     end
-    
-    def public_class(class_name, superclass = java.lang.Object, *interfaces, &block)
-      class_name = @package.empty? ? class_name : "#{@package.join('/')}/#{class_name}"
-      class_builder = ClassBuilder.new(self, class_name, @file_name, superclass, *interfaces)
-      @class_builders[class_name] ||= class_builder
+
+    def define_class(class_name, opts, &block)
+      pkg = opts[:package] || @package || []
+      class_name = pkg.empty? ? class_name : "#{pkg.join('/')}/#{class_name}"
+      class_builder = ClassBuilder.new(self, class_name, @file_name, opts)
+      @class_builders[class_name] ||= class_builder # TODO Is this really what we want?
       
       if block_given?
         if block.arity == 1
@@ -106,6 +107,22 @@ module BiteScript
       else
         return class_builder
       end
+    end
+    
+    def public_class(class_name, superclass = java.lang.Object, *interfaces, &block)
+      define_class(class_name, :visibility => :public, :superclass => superclass, :interfaces => interfaces, &block)
+    end
+    
+    def protected_class(class_name, superclass = java.lang.Object, *interfaces, &block)
+      define_class(class_name, :visibility => :protected, :superclass => superclass, :interfaces => interfaces, &block)
+    end
+    
+    def private_class(class_name, superclass = java.lang.Object, *interfaces, &block)
+      define_class(class_name, :visibility => :private, :superclass => superclass, :interfaces => interfaces, &block)
+    end
+    
+    def default_class(class_name, superclass = java.lang.Object, *interfaces, &block)
+      define_class(class_name, :visibility => :default, :superclass => superclass, :interfaces => interfaces, &block)
     end
     
     def generate
@@ -160,16 +177,32 @@ module BiteScript
     attr_accessor :imports
     attr_accessor :fields
 
-    def initialize(file_builder, class_name, file_name, superclass = Object, *interfaces)
+    def initialize(file_builder, class_name, file_name, opts) 
       @parent = file_builder
       @class_name = class_name
-      @superclass = superclass 
+      @superclass = opts[:superclass] || Object
       
       @class_writer = ClassWriter.new(ClassWriter::COMPUTE_MAXS)
       
       interface_paths = []
-      interfaces.each {|interface| interface_paths << path(interface)}
-      @class_writer.visit(BiteScript.bytecode_version, Opcodes::ACC_PUBLIC | Opcodes::ACC_SUPER, class_name, nil, path(superclass), interface_paths.to_java(:string))
+      (opts[:interfaces] || []).each {|interface| interface_paths << path(interface)}
+
+      visibility = case (opts[:visibility] && opts[:visibility].to_sym)
+        when nil
+          Opcodes::ACC_PUBLIC  # NOTE Not specified means public -- must explicitly ask for default
+        when :default
+          0
+        when :public
+          Opcodes::ACC_PUBLIC
+        when :private
+          Opcodes::ACC_PRIVATE
+        when :protected
+          Opcodes::ACC_PROTECTED
+        else
+          raise "Unknown visibility: #{opts[:visibility]}"
+      end
+
+      @class_writer.visit(BiteScript.bytecode_version, visibility | Opcodes::ACC_SUPER, class_name, nil, path(superclass), interface_paths.to_java(:string))
       @class_writer.visit_source(file_name, nil)
 
       @constructor = nil
