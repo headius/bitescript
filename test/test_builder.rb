@@ -29,7 +29,6 @@ class TestBuilder < Test::Unit::TestCase
 
   def load_and_construct(name, class_builder)
     class_bytes = class_builder.generate
-    File.open(name + ".class", 'w') {|f| f.write(class_bytes)}
     cls = JRuby.runtime.jruby_class_loader.define_class(name, class_bytes.to_java_bytes)
 
     cls.new_instance
@@ -425,5 +424,36 @@ class TestBuilder < Test::Unit::TestCase
     method = obj.class.java_class.declared_method("annotated")
     anno = method.annotation(JRubyMethod.java_class)
     assert anno
+  end
+
+  def test_package_equals
+    @builder.package = "org.jruby"
+    cb = @builder.public_class(@class_name, @builder.object);
+    dummy_constructor(cb)
+    obj = load_and_construct("org.jruby.#{@class_name}", cb);
+
+    assert_equal "org.jruby.#{@class_name}", obj.class.java_class.to_s
+  end
+
+  def test_package_builder_list
+    obj = nil
+    @builder.package "org", "jruby" do
+      cb = @builder.public_class(@class_name, @builder.object);
+      dummy_constructor(cb)
+      obj = load_and_construct("org.jruby.#{@class_name}", cb);
+    end
+
+    assert_equal "org.jruby.#{@class_name}", obj.class.java_class.to_s
+  end
+
+  def test_package_builder_string
+    obj = nil
+    @builder.package "org.jruby" do
+      cb = @builder.public_class(@class_name, @builder.object);
+      dummy_constructor(cb)
+      obj = load_and_construct("org.jruby.#{@class_name}", cb);
+    end
+
+    assert_equal "org.jruby.#{@class_name}", obj.class.java_class.to_s
   end
 end

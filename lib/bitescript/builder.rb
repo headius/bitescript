@@ -93,7 +93,8 @@ module BiteScript
     end
 
     def define_class(class_name, opts, &block)
-      pkg = opts[:package] || @package || []
+      pkg = opts[:package] || @package.dup || []
+
       class_name = pkg.empty? ? class_name : "#{pkg.join('/')}/#{class_name}"
       class_builder = ClassBuilder.new(self, class_name, @file_name, opts)
       @class_builders[class_name] ||= class_builder # TODO Is this really what we want?
@@ -138,15 +139,26 @@ module BiteScript
     end
     
     def package(*names)
-      elements = 0
+      return @package unless names.size > 0
+      
+      packages = unpack_packages(*names)
+      @package.concat(packages)
+      yield
+      @package = @package[0..(packages.size - 1)]
+    end
+
+    def package=(name)
+      @package = unpack_packages(name)
+    end
+
+    def unpack_packages(*names)
+      package = []
       names.each do |name_maybe_dotted|
         name_maybe_dotted.split(/\./).each do |name|
-          elements += 1
-          @package.push name
+          package.push name
         end
       end
-      yield
-      elements.times {@package.pop}
+      package
     end
     
     def method?
