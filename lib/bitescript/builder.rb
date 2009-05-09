@@ -171,15 +171,15 @@ module BiteScript
     include QuickTypes
 
     begin
-      import "jruby.objectweb.asm.Opcodes"
-      import "jruby.objectweb.asm.ClassWriter"
+      java_import "jruby.objectweb.asm.Opcodes"
+      java_import "jruby.objectweb.asm.ClassWriter"
     rescue
-      import "org.objectweb.asm.Opcodes"
-      import "org.objectweb.asm.ClassWriter"
+      java_import "org.objectweb.asm.Opcodes"
+      java_import "org.objectweb.asm.ClassWriter"
     end
     
-    import java.lang.Object
-    import java.lang.Void
+    java_import java.lang.Object
+    java_import java.lang.Void
     include Signature
     
     attr_accessor :class_name
@@ -371,9 +371,9 @@ module BiteScript
   
   class MethodBuilder
     begin
-      import "jruby.objectweb.asm.Opcodes"
+      java_import "jruby.objectweb.asm.Opcodes"
     rescue
-      import "org.objectweb.asm.Opcodes"
+      java_import "org.objectweb.asm.Opcodes"
     end
 
     include QuickTypes

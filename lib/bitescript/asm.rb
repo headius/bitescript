@@ -4,14 +4,14 @@ module BiteScript
   module ASM
     begin
       # try mangled names for the version included with JRuby
-      import "jruby.objectweb.asm.Opcodes"
       asm_package = Java::jruby.objectweb.asm
+      java_import asm_package.Opcodes
     rescue Exception
       # fall back on standard names
-      import "org.objectweb.asm.Opcodes"
       asm_package = org.objectweb.asm
+      java_import asm_package.Opcodes
     end
-    import asm_package.Label
-    import asm_package.Type
+    java_import asm_package.Label
+    java_import asm_package.Type
   end
 end

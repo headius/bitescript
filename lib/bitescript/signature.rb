@@ -2,16 +2,16 @@ require 'java'
 
 module BiteScript
   module JavaTypes
-    import java.lang.Object
-    import java.lang.Byte
-    import java.lang.Boolean
-    import java.lang.Short
-    import java.lang.Character
-    import java.lang.Integer
-    import java.lang.Long
-    import java.lang.Float
-    import java.lang.Double
-    import java.lang.Void
+    java_import java.lang.Object
+    java_import java.lang.Byte
+    java_import java.lang.Boolean
+    java_import java.lang.Short
+    java_import java.lang.Character
+    java_import java.lang.Integer
+    java_import java.lang.Long
+    java_import java.lang.Float
+    java_import java.lang.Double
+    java_import java.lang.Void
   end
   module Signature
     def classname(path)
