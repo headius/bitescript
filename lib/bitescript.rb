@@ -1,9 +1,12 @@
+$: << File.dirname(__FILE__)
 require 'bitescript/asm'
 require 'bitescript/signature'
 require 'bitescript/bytecode'
 require 'bitescript/builder'
 
 module BiteScript
+  VERSION = '0.0.1'
+
   include BiteScript::ASM
   JAVA1_4 = Opcodes::V1_4
   JAVA1_5 = Opcodes::V1_5
