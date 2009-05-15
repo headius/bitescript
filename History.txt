@@ -1,3 +1,9 @@
+=== 0.0.2 / 2009-05-14
+
+* Improve use support for packages, make it more API-friendly
+* Disable instance_eval when a block argument is requested
+* Allow defining non-public classes
+
 === 0.0.1 / 2009-03-28
 
 * 1 major enhancement
