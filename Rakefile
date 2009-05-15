@@ -15,8 +15,3 @@ Hoe.new('bitescript', BiteScript::VERSION) do |p|
 end
 
 task :default => :test
-
-Rake::TestTask.new do |t|
-  t.libs << "lib"
-  t.test_files = FileList["test/**/*.rb"]
-end
