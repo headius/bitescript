@@ -5,7 +5,7 @@ require 'bitescript/bytecode'
 require 'bitescript/builder'
 
 module BiteScript
-  VERSION = '0.0.2'
+  VERSION = '0.0.3'
 
   include BiteScript::ASM
   JAVA1_4 = Opcodes::V1_4
