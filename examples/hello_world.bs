@@ -1,0 +1,5 @@
+main do
+  ldc "Hello, world!"
+  aprintln
+  returnvoid
+end

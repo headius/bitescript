@@ -191,22 +191,27 @@ module BiteScript
 
       when "NEWARRAY"
         # newaray has its own peculiarities
-        {
-          :boolean => 'Opcodes::T_BOOLEAN',
-          :byte => 'Opcodes::T_BYTE',
-          :short => 'Opcodes::T_SHORT',
-          :char => 'Opcodes::T_CHAR',
-          :int => 'Opcodes::T_INT',
-          :long => 'Opcodes::T_LONG',
-          :float => 'Opcodes::T_FLOAT',
-          :double => 'Opcodes::T_DOUBLE'
-        }.each do |type, op_type|
+       NEWARRAY_TYPES = {
+          :boolean => Opcodes::T_BOOLEAN,
+          :byte => Opcodes::T_BYTE,
+          :short => Opcodes::T_SHORT,
+          :char => Opcodes::T_CHAR,
+          :int => Opcodes::T_INT,
+          :long => Opcodes::T_LONG,
+          :float => Opcodes::T_FLOAT,
+          :double => Opcodes::T_DOUBLE
+        }
+        NEWARRAY_TYPES.each do |type, op_type|
           line = __LINE__; eval "
               def new#{type}array()
                 method_visitor.visit_int_insn(Opcodes::#{const_name}, #{op_type})
                 #{OpcodeStackDeltas[const_name]}
               end
             ", b, __FILE__, line
+        end
+        def newarray(type)
+          t_type = NEWARRAY_TYPES[path(type).intern]
+          method_visitor.visit_int_insn(Opcodes::NEWARRAY, t_type)
         end
         OpcodeInstructions[const_name] = const_down
           

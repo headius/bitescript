@@ -1,0 +1,23 @@
+import java.lang.System
+import java.io.PrintStream
+
+macro :aprintln do
+  getstatic System, :out, PrintStream
+  swap
+  invokevirtual PrintStream, println, [Object]
+end
+
+macro :aprint do
+  getstatic System, :out, PrintStream
+  swap
+  invokevirtual PrintStream, print, [Object]
+end
+
+main do
+  ldc "Hello, "
+  aprint
+  aload 0
+  aaload 0
+  aprintln
+  returnvoid
+end

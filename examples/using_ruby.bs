@@ -1,0 +1,7 @@
+main do
+  5.times do
+    ldc "Wow!"
+    aprintln
+  end
+  returnvoid
+end

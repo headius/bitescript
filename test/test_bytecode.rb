@@ -285,6 +285,15 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_LONG], @dummy.single {newlongarray})
     assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_FLOAT], @dummy.single {newfloatarray})
     assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_DOUBLE], @dummy.single {newdoublearray})
+
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_BOOLEAN], @dummy.single {newarray Java::boolean})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_BYTE], @dummy.single {newarray Java::byte})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_SHORT], @dummy.single {newarray Java::short})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_CHAR], @dummy.single {newarray Java::char})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_INT], @dummy.single {newarray Java::int})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_LONG], @dummy.single {newarray Java::long})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_FLOAT], @dummy.single {newarray Java::float})
+    assert_equal([:visit_int_insn, Opcodes::NEWARRAY, Opcodes::T_DOUBLE], @dummy.single {newarray Java::double})
   end
   
   def test_field_insns
