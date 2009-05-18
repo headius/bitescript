@@ -39,6 +39,11 @@ module BiteScript
     
     OpcodeInstructions = {}
 
+    # Add INVOKEDYNAMIC as opcode number 186
+    module ASM::Opcodes
+      INVOKEDYNAMIC = 186
+    end
+
     Opcodes.constants.each do |const_name|
       const_down = const_name.downcase
       
@@ -100,7 +105,7 @@ module BiteScript
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
           
-      when "INVOKESTATIC", "INVOKEVIRTUAL", "INVOKEINTERFACE", "INVOKESPECIAL"
+      when "INVOKESTATIC", "INVOKEVIRTUAL", "INVOKEINTERFACE", "INVOKESPECIAL", "INVOKEDYNAMIC"
         # method instructions
         line = __LINE__; eval "
             def #{const_down}(type, name, call_sig)

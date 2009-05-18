@@ -1,0 +1,1 @@
+main { aload 0; invokedynamic object, 'foo', [object]; returnvoid }
