@@ -381,6 +381,7 @@ module BiteScript
     
     attr_reader :method_visitor
     attr_reader :static
+    alias :static? :static
     attr_reader :signature
     attr_reader :name
     attr_reader :class_builder
