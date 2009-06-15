@@ -1,3 +1,7 @@
+=== 0.0.3 / 2009-06-14
+
+* Support for Java 1.7 and invokedynamic
+
 === 0.0.2 / 2009-05-14
 
 * Improve use support for packages, make it more API-friendly
