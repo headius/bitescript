@@ -395,6 +395,7 @@ module BiteScript
       @method_visitor = class_builder.new_method(modifiers, name, signature)
       
       @locals = {}
+      @big_locals = 0
       
       @static = (modifiers & Opcodes::ACC_STATIC) != 0
     end
@@ -439,7 +440,7 @@ module BiteScript
       @class_builder
     end
     
-    def local(name)
+    def local(name, big=false)
       if name == "this" && @static
         raise "'this' attempted to load from static method"
       end
@@ -447,7 +448,8 @@ module BiteScript
       if @locals[name]
         local_index = @locals[name]
       else
-        local_index = @locals[name] = @locals.size
+        local_index = @locals[name] = @locals.size + @big_locals
+        @big_locals += 1 if big
       end
       local_index
     end
