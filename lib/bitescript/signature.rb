@@ -46,6 +46,7 @@ module BiteScript
       if cls.array?
         cls = cls.component_type
         if cls.primitive?
+          cls = cls.primitive_type if cls.respond_to? :primitive_type
           case cls
           when JavaTypes::Byte::TYPE
             return "[B"
@@ -71,6 +72,7 @@ module BiteScript
         end
       else
         if cls.primitive?
+          cls = cls.primitive_type if cls.respond_to? :primitive_type
           case cls
           when JavaTypes::Byte::TYPE
             return "B"
