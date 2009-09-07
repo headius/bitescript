@@ -65,7 +65,7 @@ module BiteScript
           when JavaTypes::Double::TYPE
             return "[D"
           else
-            raise "Unknown type in compiler: " + cls.name
+            raise "Unknown type in compiler: #{cls.name}"
           end
         else
           return "[#{class_id(cls)}"
@@ -93,7 +93,7 @@ module BiteScript
           when JavaTypes::Void::TYPE, java.lang.Void
             return "V"
           else
-            raise "Unknown type in compiler: " + cls.name
+            raise "Unknown type in compiler: #{cls.name}"
           end
         else
           return "L#{path(cls)};"
