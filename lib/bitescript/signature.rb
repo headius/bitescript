@@ -35,7 +35,7 @@ module BiteScript
     def class_id(cls)
       cls = cls.java_class if Class === cls
       
-      if !cls || cls == java.lang.Void || cls == Java::void
+      if !cls || cls == java.lang.Void.java_class || Java::void == cls
         return "V"
       end
       
