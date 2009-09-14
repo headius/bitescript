@@ -232,10 +232,10 @@ module BiteScript
     def stop
       # if we haven't seen a constructor, generate a default one
       unless @constructor
-        method = MethodBuilder.new(self, Opcodes::ACC_PUBLIC, "<init>", [])
+        method = public_constructor
         method.start
         method.aload 0
-        method.invokespecial @superclass, "<init>", Void::TYPE
+        method.invokespecial @superclass, "<init>", [Void::TYPE]
         method.returnvoid
         method.stop
       end
@@ -279,7 +279,7 @@ module BiteScript
       # constructors; also defines a "this" local at index 0
       eval "
         def #{modifier}_constructor(*signature, &block)
-          method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], &block)
+          @constructor = method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], &block)
         end
       ", binding, __FILE__, __LINE__
     end
