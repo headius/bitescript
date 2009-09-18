@@ -394,7 +394,9 @@ module BiteScript
     end
     
     def line(num)
-      method_visitor.visit_line_number(num, label.set!) if num != @line_num
+      if num != @line_num
+        method_visitor.visit_line_number(num, label.set!.label)
+      end
       @line_num = num
     end
 
