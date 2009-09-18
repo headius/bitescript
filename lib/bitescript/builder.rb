@@ -299,7 +299,7 @@ module BiteScript
       end
 
       # non-static methods reserve index 0 for 'this'
-      mb.local 'this' if (flags & Opcodes::ACC_STATIC) == 0
+      mb.local 'this', self if (flags & Opcodes::ACC_STATIC) == 0
       
       if block_given?
         mb.start
@@ -398,6 +398,8 @@ module BiteScript
       @big_locals = 0
       
       @static = (modifiers & Opcodes::ACC_STATIC) != 0
+      @start_label = labels[:start] = self.label
+      @end_label = labels[:end] = self.label
     end
 
     def parameter_types
@@ -440,15 +442,18 @@ module BiteScript
       @class_builder
     end
     
-    def local(name, big=false)
+    def local(name, type)
       if name == "this" && @static
         raise "'this' attempted to load from static method"
       end
       
       if @locals[name]
-        local_index = @locals[name]
+        local_index = @locals[name][0]
       else
-        local_index = @locals[name] = @locals.size + @big_locals
+        type = ci(type)
+        big = "JD".include? type
+        local_index = @locals.size + @big_locals
+        @locals[name] = [local_index, type]
         @big_locals += 1 if big
       end
       local_index

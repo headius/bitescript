@@ -319,9 +319,17 @@ module BiteScript
     
     def start
       method_visitor.visit_code
+      @start_label.set!
     end
     
     def stop
+      @end_label.set!
+      @locals.each do |name, (local_index, type)|
+        method_visitor.visit_local_variable(name, type, nil,
+                                            @start_label.label,
+                                            @end_label.label,
+                                            local_index)
+      end
       method_visitor.visit_maxs(1,1)
       method_visitor.visit_end
     end
@@ -344,6 +352,7 @@ module BiteScript
       
       def set!
         @method_visitor.visit_label(@label)
+        self
       end
     end
 
@@ -385,7 +394,8 @@ module BiteScript
     end
     
     def line(num)
-      method_visitor.visit_line_number num, ASM::Label.new
+      method_visitor.visit_line_number(num, label.set!) if num != @line_num
+      @line_num = num
     end
 
     def push_int(num)
