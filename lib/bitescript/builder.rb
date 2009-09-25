@@ -188,16 +188,18 @@ module BiteScript
     attr_accessor :methods
     attr_accessor :imports
     attr_accessor :fields
+    attr_accessor :interfaces
 
     def initialize(file_builder, class_name, file_name, opts) 
       @parent = file_builder
       @class_name = class_name
       @superclass = opts[:superclass] || Object
+      @interfaces = opts[:interfaces] || []
       
       @class_writer = ClassWriter.new(ClassWriter::COMPUTE_MAXS)
       
       interface_paths = []
-      (opts[:interfaces] || []).each {|interface| interface_paths << path(interface)}
+      (@interfaces).each {|interface| interface_paths << path(interface)}
 
       visibility = case (opts[:visibility] && opts[:visibility].to_sym)
         when nil
