@@ -114,6 +114,10 @@ module BiteScript
       define_class(class_name, :visibility => :public, :superclass => superclass, :interfaces => interfaces, &block)
     end
     
+    def public_interface(class_name, *interfaces, &block)
+      define_class(class_name, :visibility => :public, :interface => true, :interfaces => interfaces, &block)
+    end
+    
     def protected_class(class_name, superclass = java.lang.Object, *interfaces, &block)
       define_class(class_name, :visibility => :protected, :superclass => superclass, :interfaces => interfaces, &block)
     end
@@ -195,6 +199,11 @@ module BiteScript
       @class_name = class_name
       @superclass = opts[:superclass] || Object
       @interfaces = opts[:interfaces] || []
+      @interface = opts[:interface]
+      flags = Opcodes::ACC_SUPER
+      if @interface
+        flags |= Opcodes::ACC_INTERFACE | Opcodes::ACC_ABSTRACT
+      end
       
       @class_writer = ClassWriter.new(ClassWriter::COMPUTE_MAXS)
       
@@ -216,7 +225,7 @@ module BiteScript
           raise "Unknown visibility: #{opts[:visibility]}"
       end
 
-      @class_writer.visit(BiteScript.bytecode_version, visibility | Opcodes::ACC_SUPER, class_name, nil, path(superclass), interface_paths.to_java(:string))
+      @class_writer.visit(BiteScript.bytecode_version, visibility | flags, class_name, nil, path(superclass), interface_paths.to_java(:string))
       @class_writer.visit_source(file_name, nil)
 
       @constructor = nil
@@ -233,8 +242,8 @@ module BiteScript
 
     def stop
       # if we haven't seen a constructor, generate a default one
-      unless @constructor
-        method = public_constructor
+      unless @constructor || @interface
+        method = public_constructor([])
         method.start
         method.aload 0
         method.invokespecial @superclass, "<init>", [Void::TYPE]
@@ -262,26 +271,26 @@ module BiteScript
       ", binding, __FILE__, __LINE__
       # instance methods; also defines a "this" local at index 0
       eval "
-        def #{modifier}_method(name, *signature, &block)
-          method(Opcodes::ACC_#{modifier.upcase}, name, signature, &block)
+        def #{modifier}_method(name, exceptions, *signature, &block)
+          method(Opcodes::ACC_#{modifier.upcase}, name, signature, exceptions, &block)
         end
       ", binding, __FILE__, __LINE__
       # static methods
       eval "
-        def #{modifier}_static_method(name, *signature, &block)
-          method(Opcodes::ACC_STATIC | Opcodes::ACC_#{modifier.upcase}, name, signature, &block)
+        def #{modifier}_static_method(name, exceptions, *signature, &block)
+          method(Opcodes::ACC_STATIC | Opcodes::ACC_#{modifier.upcase}, name, signature, exceptions, &block)
         end
       ", binding, __FILE__, __LINE__
       # native methods
       eval "
-        def #{modifier}_native_method(name, *signature)
-          method(Opcodes::ACC_NATIVE | Opcodes::ACC_#{modifier.upcase}, name, signature)
+        def #{modifier}_native_method(name, exceptions, *signature)
+          method(Opcodes::ACC_NATIVE | Opcodes::ACC_#{modifier.upcase}, name, signature, exceptions)
         end
       ", binding, __FILE__, __LINE__
       # constructors; also defines a "this" local at index 0
       eval "
-        def #{modifier}_constructor(*signature, &block)
-          @constructor = method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], &block)
+        def #{modifier}_constructor(exceptions, *signature, &block)
+          @constructor = method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], exceptions, &block)
         end
       ", binding, __FILE__, __LINE__
     end
@@ -290,8 +299,9 @@ module BiteScript
       method(Opcodes::ACC_STATIC, "<clinit>", [void], &block)
     end
     
-    def method(flags, name, signature, &block)
-      mb = MethodBuilder.new(self, flags, name, signature)
+    def method(flags, name, signature, exceptions, &block)
+      flags |= Opcodes::ACC_ABSTRACT if interface?
+      mb = MethodBuilder.new(self, flags, name, exceptions, signature)
 
       if name == "<init>"
         constructors[signature[1..-1]] = mb
@@ -303,7 +313,7 @@ module BiteScript
       # non-static methods reserve index 0 for 'this'
       mb.local 'this', self if (flags & Opcodes::ACC_STATIC) == 0
       
-      if block_given?
+      if block_given? && !interface?
         mb.start
         if block.arity == 1
           block.call(mb)
@@ -327,7 +337,7 @@ module BiteScript
     def main(&b)
       raise "already defined main" if methods[name]
 
-      public_static_method "main", void, string[], &b
+      public_static_method "main", [], void, string[], &b
     end
 
     def constructor(*params)
@@ -336,7 +346,7 @@ module BiteScript
 
     def interface?
       # TODO: interface types
-      false
+      @interface
     end
     
     def field(flags, name, type)
@@ -362,8 +372,11 @@ module BiteScript
       self
     end
     
-    def new_method(modifiers, name, signature)
-      @class_writer.visit_method(modifiers, name, sig(*signature), nil, nil)
+    def new_method(modifiers, name, signature, exceptions)
+      exceptions ||= []
+      raise ArgumentError unless exceptions.kind_of?(Array)
+      exceptions = exceptions.map {|e| path(e)}
+      @class_writer.visit_method(modifiers, name, sig(*signature), nil, exceptions.to_java(:string))
     end
 
     def macro(name, &b)
@@ -388,13 +401,13 @@ module BiteScript
     attr_reader :name
     attr_reader :class_builder
     
-    def initialize(class_builder, modifiers, name, signature)
+    def initialize(class_builder, modifiers, name, exceptions, signature)
       @class_builder = class_builder
       @modifiers = modifiers
       @name = name
       @signature = signature
       
-      @method_visitor = class_builder.new_method(modifiers, name, signature)
+      @method_visitor = class_builder.new_method(modifiers, name, signature, exceptions)
       
       @locals = {}
       @big_locals = 0
@@ -402,6 +415,7 @@ module BiteScript
       @static = (modifiers & Opcodes::ACC_STATIC) != 0
       @start_label = labels[:start] = self.label
       @end_label = labels[:end] = self.label
+      @exceptions = exceptions || []
     end
 
     def parameter_types
