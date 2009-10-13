@@ -410,7 +410,7 @@ module BiteScript
       @method_visitor = class_builder.new_method(modifiers, name, signature, exceptions)
       
       @locals = {}
-      @big_locals = 0
+      @next_local = 0
       
       @static = (modifiers & Opcodes::ACC_STATIC) != 0
       @start_label = labels[:start] = self.label
@@ -464,15 +464,48 @@ module BiteScript
       end
       
       if @locals[name]
-        local_index = @locals[name][0]
+        return @locals[name][-1][0]
       else
-        type = ci(type)
-        big = "JD".include? type
-        local_index = @locals.size + @big_locals
-        @locals[name] = [local_index, type]
-        @big_locals += 1 if big
+        return push_local(name, type, @start_label)
       end
-      local_index
+    end
+    
+    def push_local(name, type, start=nil)
+      start ||= self.label.set!
+      type = ci(type)
+      big = "JD".include? type
+      match = @locals[name].find {|local| !big || local[1]} if @locals[name]
+      if match
+        index = match[0]
+      else
+        index = @next_local
+        @next_local += 1
+        @next_local += 1 if big
+      end
+      
+      if @locals[name] && @locals[name].size > 0
+        local_debug_info(name, @locals[name][-1])
+      else
+        @locals[name] = []
+      end
+      @locals[name] << [index, big, type, start]
+      index
+    end
+    
+    def local_debug_info(name, local, end_label=nil)
+      return unless local
+      index, big, type, start = local
+      end_label ||= self.label.set!
+      method_visitor.visit_local_variable(name, type, nil,
+                                          start.label,
+                                          end_label.label,
+                                          index)
+    end
+    
+    def pop_local(name)
+      here = self.label.set!
+      local_debug_info(name, @locals[name].pop, here)
+      @locals[name][-1][-1] = here if @locals[name].size > 0
     end
 
     def annotate(cls, runtime = false)

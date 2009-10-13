@@ -324,11 +324,8 @@ module BiteScript
     
     def stop
       @end_label.set!
-      @locals.each do |name, (local_index, type)|
-        method_visitor.visit_local_variable(name, type, nil,
-                                            @start_label.label,
-                                            @end_label.label,
-                                            local_index)
+      @locals.each do |name, locals|
+        local_debug_info(name, locals[-1], @end_label)
       end
       method_visitor.visit_maxs(1,1)
       method_visitor.visit_end
