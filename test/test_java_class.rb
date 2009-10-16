@@ -19,8 +19,8 @@ class TestJavaClass < Test::Unit::TestCase
         assert_equal [java.lang.String.java_class], cons2.parameter_types
 
         cls = BiteScript::FileBuilder.new('x').#{visibility}_class('y')
-        cls.public_constructor()
-        cls.public_constructor(java.lang.String.java_class)
+        cls.public_constructor([])
+        cls.public_constructor([], java.lang.String.java_class)
 
         cons1 = cls.constructor()
         cons2 = cls.constructor(java.lang.String.java_class)
@@ -47,8 +47,8 @@ class TestJavaClass < Test::Unit::TestCase
         assert_equal [java.lang.Object.java_class], m2.parameter_types
 
         cls = BiteScript::FileBuilder.new('x').#{visibility}_class('y')
-        cls.public_method('toString', java.lang.String.java_class)
-        cls.public_method('equals', Java::boolean.java_class, java.lang.Object.java_class)
+        cls.public_method('toString', [], java.lang.String.java_class)
+        cls.public_method('equals', [], Java::boolean.java_class, java.lang.Object.java_class)
 
         m1 = cls.java_method('toString')
         m2 = cls.java_method('equals', java.lang.Object.java_class)

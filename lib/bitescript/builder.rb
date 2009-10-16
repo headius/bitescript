@@ -296,7 +296,7 @@ module BiteScript
     end
 
     def static_init(&block)
-      method(Opcodes::ACC_STATIC, "<clinit>", [void], &block)
+      method(Opcodes::ACC_STATIC, "<clinit>", [void], [], &block)
     end
     
     def method(flags, name, signature, exceptions, &block)
@@ -374,7 +374,9 @@ module BiteScript
     
     def new_method(modifiers, name, signature, exceptions)
       exceptions ||= []
-      raise ArgumentError unless exceptions.kind_of?(Array)
+      unless exceptions.kind_of?(Array)
+        raise ArgumentError, "Expected array of exceptions, got #{exceptions.inspect}"
+      end
       exceptions = exceptions.map {|e| path(e)}
       @class_writer.visit_method(modifiers, name, sig(*signature), nil, exceptions.to_java(:string))
     end
@@ -458,7 +460,7 @@ module BiteScript
       @class_builder
     end
     
-    def local(name, type)
+    def local(name, type=nil)
       if name == "this" && @static
         raise "'this' attempted to load from static method"
       end
@@ -466,6 +468,7 @@ module BiteScript
       if @locals[name]
         return @locals[name][-1][0]
       else
+        raise ArgumentError, 'Local type required' unless type
         return push_local(name, type, @start_label)
       end
     end

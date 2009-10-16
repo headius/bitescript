@@ -20,7 +20,7 @@ class TestBuilder < Test::Unit::TestCase
   end
 
   def dummy_constructor(class_builder)
-    class_builder.public_constructor do
+    class_builder.public_constructor([]) do
       aload local 'this'
       invokespecial object, '<init>', [void]
       returnvoid
@@ -43,7 +43,7 @@ class TestBuilder < Test::Unit::TestCase
   def try(return_type, &b)
     class_name = new_class_name
     cb = @builder.public_class(class_name, @builder.object);
-    cb.public_static_method("foo", return_type, &b)
+    cb.public_static_method("foo", [], return_type, &b)
     dummy_constructor(cb)
     cls = load(class_name, cb)
     cls.foo
@@ -248,10 +248,10 @@ class TestBuilder < Test::Unit::TestCase
 
   def test_instance_method_this
     cb = @builder.public_class(@class_name, @builder.object);
-    method = cb.public_method("foo", cb.this) {aload local 'this'; areturn}
+    method = cb.public_method("foo", [], cb.this) {aload local 'this'; areturn}
 
     # ensure "this" is taking slot zero
-    method.local('another')
+    method.local('another', Java::int)
     assert_equal(method.local('this'), 0)
     assert_equal(method.local('another'), 1)
 
@@ -264,7 +264,7 @@ class TestBuilder < Test::Unit::TestCase
   def test_constructor_this
     cb = @builder.public_class(@class_name, @builder.object);
     cb.private_field "self", cb.this
-    constructor = cb.public_constructor do
+    constructor = cb.public_constructor([]) do
       aload 0
       dup
       invokespecial object, "<init>", [void]
@@ -273,14 +273,14 @@ class TestBuilder < Test::Unit::TestCase
       returnvoid
     end
 
-    cb.public_method "get_self", cb.this do
+    cb.public_method "get_self", [], cb.this do
       aload 0
       getfield this, "self", this
       areturn
     end
 
     # ensure "this" is taking slot zero
-    constructor.local('another')
+    constructor.local('another', Java::int)
     assert_equal(constructor.local('this'), 0)
     assert_equal(constructor.local('another'), 1)
 
@@ -292,7 +292,7 @@ class TestBuilder < Test::Unit::TestCase
     cb = @builder.public_class(@class_name, @builder.object);
     
     body_called = false
-    cb.public_native_method("yoohoo") {body_called = true}
+    cb.public_native_method("yoohoo", []) {body_called = true}
 
     assert !body_called
 
@@ -309,10 +309,10 @@ class TestBuilder < Test::Unit::TestCase
     cb.public_field('inst_field', JString)
     cb.public_static_field('static_field', JString)
 
-    cb.public_method('set_inst', cb.void) {aload 0; ldc 'instance'; putfield this, 'inst_field', JString; returnvoid}
-    cb.public_method('set_static', cb.void) {ldc 'static'; putstatic this, 'static_field', JString; returnvoid}
-    cb.public_method('get_inst', JString) {aload 0; getfield this, 'inst_field', JString; areturn}
-    cb.public_method('get_static', JString) {getstatic this, 'static_field', JString; areturn}
+    cb.public_method('set_inst', [], cb.void) {aload 0; ldc 'instance'; putfield this, 'inst_field', JString; returnvoid}
+    cb.public_method('set_static', [], cb.void) {ldc 'static'; putstatic this, 'static_field', JString; returnvoid}
+    cb.public_method('get_inst', [], JString) {aload 0; getfield this, 'inst_field', JString; areturn}
+    cb.public_method('get_static', [], JString) {getstatic this, 'static_field', JString; areturn}
 
     dummy_constructor(cb)
     obj = load_and_construct(@class_name, cb);
@@ -328,15 +328,15 @@ class TestBuilder < Test::Unit::TestCase
   def test_arrays
     cb = @builder.public_class(@class_name, @builder.object);
 
-    cb.public_method("newbooleanarray", cb.boolean[]) {ldc 5; newbooleanarray; dup; ldc 1; ldc true; bastore; dup; dup; ldc 2; swap; ldc 1; baload; bastore; areturn}
-    cb.public_method("newbytearray", cb.byte[]) {ldc 5; newbytearray; dup; ldc 1; ldc 1; bastore; dup; dup; ldc 2; swap; ldc 1; baload; bastore; areturn}
-    cb.public_method("newshortarray", cb.short[]) {ldc 5; newshortarray; dup; ldc 1; ldc 1; sastore; dup; dup; ldc 2; swap; ldc 1; saload; sastore; areturn}
-    cb.public_method("newchararray", cb.char[]) {ldc 5; newchararray; dup; ldc 1; ldc 1; castore; dup; dup; ldc 2; swap; ldc 1; caload; castore; areturn}
-    cb.public_method("newintarray", cb.int[]) {ldc 5; newintarray; dup; ldc 1; ldc 1; iastore; dup; dup; ldc 2; swap; ldc 1; iaload; iastore; areturn}
-    cb.public_method("newlongarray", cb.long[]) {ldc 5; newlongarray; dup; ldc 1; ldc_long 1; lastore; dup; dup; ldc 2; swap; ldc 1; laload; lastore; areturn}
-    cb.public_method("newfloatarray", cb.float[]) {ldc 5; newfloatarray; dup; ldc 1; ldc_float 1.0; fastore; dup; dup; ldc 2; swap; ldc 1; faload; fastore; areturn}
-    cb.public_method("newdoublearray", cb.double[]) {ldc 5; newdoublearray; dup; ldc 1; ldc 1.0; dastore; dup; dup; ldc 2; swap; ldc 1; daload; dastore; areturn}
-    cb.public_method("anewarray", cb.string[]) {ldc 5; anewarray JString; dup; ldc 1; ldc 'foo'; aastore; dup; dup; ldc 2; swap; ldc 1; aaload; aastore; areturn}
+    cb.public_method("newbooleanarray", [], cb.boolean[]) {ldc 5; newbooleanarray; dup; ldc 1; ldc true; bastore; dup; dup; ldc 2; swap; ldc 1; baload; bastore; areturn}
+    cb.public_method("newbytearray", [], cb.byte[]) {ldc 5; newbytearray; dup; ldc 1; ldc 1; bastore; dup; dup; ldc 2; swap; ldc 1; baload; bastore; areturn}
+    cb.public_method("newshortarray", [], cb.short[]) {ldc 5; newshortarray; dup; ldc 1; ldc 1; sastore; dup; dup; ldc 2; swap; ldc 1; saload; sastore; areturn}
+    cb.public_method("newchararray", [], cb.char[]) {ldc 5; newchararray; dup; ldc 1; ldc 1; castore; dup; dup; ldc 2; swap; ldc 1; caload; castore; areturn}
+    cb.public_method("newintarray", [], cb.int[]) {ldc 5; newintarray; dup; ldc 1; ldc 1; iastore; dup; dup; ldc 2; swap; ldc 1; iaload; iastore; areturn}
+    cb.public_method("newlongarray", [], cb.long[]) {ldc 5; newlongarray; dup; ldc 1; ldc_long 1; lastore; dup; dup; ldc 2; swap; ldc 1; laload; lastore; areturn}
+    cb.public_method("newfloatarray", [], cb.float[]) {ldc 5; newfloatarray; dup; ldc 1; ldc_float 1.0; fastore; dup; dup; ldc 2; swap; ldc 1; faload; fastore; areturn}
+    cb.public_method("newdoublearray", [], cb.double[]) {ldc 5; newdoublearray; dup; ldc 1; ldc 1.0; dastore; dup; dup; ldc 2; swap; ldc 1; daload; dastore; areturn}
+    cb.public_method("anewarray", [], cb.string[]) {ldc 5; anewarray JString; dup; ldc 1; ldc 'foo'; aastore; dup; dup; ldc 2; swap; ldc 1; aaload; aastore; areturn}
 
     dummy_constructor(cb)
     obj = load_and_construct(@class_name, cb);
@@ -404,7 +404,7 @@ class TestBuilder < Test::Unit::TestCase
   def test_annotation
     cb = @builder.public_class(@class_name, @builder.object);
     
-    cb.public_method("annotated", cb.void) do
+    cb.public_method("annotated", [], cb.void) do
       annotate(JRubyMethod, true) do |anno|
         anno.name = ["foo"]
         anno.required = 1
