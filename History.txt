@@ -1,3 +1,19 @@
+=== 0.0.4 / 2009-10-27
+
+* Multiple improvements to support Duby (thanks to Ryan Brown!):
+  * Add support for shadowing local variables
+  * Interface and "throws" support.
+  * Add an accessor for ClassBuilder.interfaces
+  * ignore nil line numbers
+  * Fix typo in line numbering
+  * Improve debug info support
+  * Fix class.stop to generate a valid constructor when one is not defined.
+  * Fix void comparison bugs
+  * Fix string concat
+  * Allow custom classes to represent primitive types
+  * Add support for big locals (long/double)
+  * Add a static? accessor to MethodBuilder.
+
 === 0.0.3 / 2009-06-14
 
 * Support for Java 1.7 and invokedynamic
