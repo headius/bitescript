@@ -271,25 +271,25 @@ module BiteScript
       ", binding, __FILE__, __LINE__
       # instance methods; also defines a "this" local at index 0
       eval "
-        def #{modifier}_method(name, exceptions, *signature, &block)
+        def #{modifier}_method(name, exceptions=[], *signature, &block)
           method(Opcodes::ACC_#{modifier.upcase}, name, signature, exceptions, &block)
         end
       ", binding, __FILE__, __LINE__
       # static methods
       eval "
-        def #{modifier}_static_method(name, exceptions, *signature, &block)
+        def #{modifier}_static_method(name, exceptions=[], *signature, &block)
           method(Opcodes::ACC_STATIC | Opcodes::ACC_#{modifier.upcase}, name, signature, exceptions, &block)
         end
       ", binding, __FILE__, __LINE__
       # native methods
       eval "
-        def #{modifier}_native_method(name, exceptions, *signature)
+        def #{modifier}_native_method(name, exceptions=[], *signature)
           method(Opcodes::ACC_NATIVE | Opcodes::ACC_#{modifier.upcase}, name, signature, exceptions)
         end
       ", binding, __FILE__, __LINE__
       # constructors; also defines a "this" local at index 0
       eval "
-        def #{modifier}_constructor(exceptions, *signature, &block)
+        def #{modifier}_constructor(exceptions=[], *signature, &block)
           @constructor = method(Opcodes::ACC_#{modifier.upcase}, \"<init>\", [nil, *signature], exceptions, &block)
         end
       ", binding, __FILE__, __LINE__
