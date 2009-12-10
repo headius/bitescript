@@ -75,7 +75,6 @@ class TestBuilder < Test::Unit::TestCase
       pop
       aload 0
 #      monitorexit
-      label :end
       trycatch(:begin, :finally, :finally, nil)
       trycatch(:finally, :end, :finally, nil)
       after.set!
@@ -171,7 +170,6 @@ class TestBuilder < Test::Unit::TestCase
       label :catch
       ldc 2
       ireturn
-      label :end
       trycatch(:begin, :catch, :catch, java.lang.Exception)
     }
   end

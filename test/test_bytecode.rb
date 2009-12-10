@@ -394,7 +394,8 @@ class TestBytecode < Test::Unit::TestCase
   
   def test_label
     l1 = label
-    assert_equal([:visit_label, l1.label], l1.set!)
+    l1.set!
+    assert_equal([:visit_label, l1.label], @dummy.all.first)
   end
   
   def test_aprintln
