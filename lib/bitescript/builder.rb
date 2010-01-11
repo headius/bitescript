@@ -58,6 +58,29 @@ module BiteScript
       nil
     end
   end
+
+  module Annotatable
+    java_import "java.lang.annotation.Retention"
+    def annotate(cls, runtime=nil)
+      if Java::JavaClass === cls
+        java_class = cls
+      else
+        java_class = cls.java_class
+      end
+      
+      if runtime.nil?
+        retention = java_class.annotation(Retention.java_class)
+        return if retention && retention.value.name == 'CLASS'
+        runtime = retention && retention.value.name == 'RUNTIME'
+      end
+
+      annotation = visit_annotation(Signature.ci(java_class), runtime)
+      annotation.extend AnnotationBuilder
+
+      yield annotation
+      annotation.visit_end
+    end
+  end
   
   class FileBuilder
     include Util
@@ -173,6 +196,7 @@ module BiteScript
   class ClassBuilder
     include Util
     include QuickTypes
+    include Annotatable
 
     begin
       java_import "jruby.objectweb.asm.Opcodes"
@@ -350,7 +374,8 @@ module BiteScript
     end
     
     def field(flags, name, type)
-      @class_writer.visit_field(flags, name, ci(type), nil, nil)
+      field = @class_writer.visit_field(flags, name, ci(type), nil, nil)
+      field.extend Annotatable
     end
     
     # name for signature generation using the class being generated
@@ -370,6 +395,10 @@ module BiteScript
     
     def this
       self
+    end
+    
+    def visit_annotation(*args)
+      @class_writer.visit_annotation(*args)
     end
     
     def new_method(modifiers, name, signature, exceptions)
@@ -394,6 +423,7 @@ module BiteScript
     end
 
     include QuickTypes
+    include Annotatable
     include BiteScript::Bytecode
     
     attr_reader :method_visitor
@@ -511,22 +541,13 @@ module BiteScript
       @locals[name][-1][-1] = here if @locals[name].size > 0
     end
 
-    def annotate(cls, runtime = false)
-      if Java::JavaClass == cls
-        java_class = cls
-      else
-        java_class = cls.java_class
-      end
-
-      annotation = @method_visitor.visit_annotation(ci(java_class), true)
-      annotation.extend AnnotationBuilder
-
-      yield annotation
-      annotation.visit_end
+    def visit_annotation(*args)
+      @method_visitor.visit_annotation(*args)
     end
   end
 
   module AnnotationBuilder
+    include Signature
     def method_missing(name, val)
       name_str = name.to_s
       if name_str[-1] == ?=
@@ -546,7 +567,7 @@ module BiteScript
       visit k, v
     end
     def annotation(name, cls)
-      if Java::JavaClass == cls
+      if Java::JavaClass === cls
         java_class = cls
       else
         java_class = cls.java_class
