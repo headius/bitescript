@@ -226,7 +226,7 @@ module BiteScript
       @interface = opts[:interface]
       flags = Opcodes::ACC_SUPER
       if @interface
-        flags |= Opcodes::ACC_INTERFACE | Opcodes::ACC_ABSTRACT
+        flags = Opcodes::ACC_INTERFACE | Opcodes::ACC_ABSTRACT
       end
       
       @class_writer = ClassWriter.new(ClassWriter::COMPUTE_MAXS)
