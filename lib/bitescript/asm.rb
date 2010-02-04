@@ -16,5 +16,6 @@ module BiteScript
     end
     java_import asm_package.Label
     java_import asm_package.Type
+    java_import asm_package.ClassWriter
   end
 end
