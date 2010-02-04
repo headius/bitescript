@@ -58,7 +58,7 @@ main do
   returnvoid
 end
 
-public_static_method "fib", int, int do
+public_static_method "fib", [], int, int do
   iload 0
   ldc 2
   recurse = label
