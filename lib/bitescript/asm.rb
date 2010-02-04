@@ -4,6 +4,9 @@ module BiteScript
   module ASM
     begin
       # try mangled names for the version included with JRuby
+      java.lang.Class.for_name 'jruby.objectweb.asm.Opcodes'
+      
+      # no error, proceed with mangled name
       asm_package = Java::jruby.objectweb.asm
       java_import asm_package.Opcodes
     rescue Exception
