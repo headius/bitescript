@@ -70,8 +70,8 @@ class TestBytecode < Test::Unit::TestCase
 
     assert_equal([:visit_int_insn, Opcodes::SIPUSH, -129], @dummy.single {ldc(-129)})
     assert_equal([:visit_int_insn, Opcodes::SIPUSH, 128], @dummy.single {ldc(128)})
-    assert_equal([:visit_ldc_insn, -32769.to_java(:int)], @dummy.single {ldc(-32769)})
-    assert_equal([:visit_ldc_insn, 32768.to_java(:int)], @dummy.single {ldc(32768)})
+    assert_equal([:visit_ldc_insn, java.lang.Integer.new(-32769)], @dummy.single {ldc(-32769)})
+    assert_equal([:visit_ldc_insn, java.lang.Integer.new(32768)], @dummy.single {ldc(32768)})
     assert_equal([:visit_ldc_insn, java.lang.Integer::MIN_VALUE - 1], @dummy.single {ldc(java.lang.Integer::MIN_VALUE - 1)})
     assert_equal([:visit_ldc_insn, java.lang.Integer::MAX_VALUE + 1], @dummy.single {ldc(java.lang.Integer::MAX_VALUE + 1)})
     
