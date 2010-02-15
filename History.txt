@@ -1,3 +1,13 @@
+=== 0.0.5 / 2010-02-04
+
+* Get tests and examples all working nicely again
+* Clean up some -w noise from mangled ASM path
+* Annotations, exceptions, many other Java features added
+
+=== 0.0.4 / 2009-10-27
+
+* Numeric fixes and feature additions to support Duby and other consumers
+
 === 0.0.3 / 2009-06-14
 
 * Support for Java 1.7 and invokedynamic
