@@ -9,7 +9,8 @@ Gem::Specification.new do |s|
   s.email = ["headius@headius.com", "ribrdb@gmail.com"]
   s.executables = ["bite", "bitec"]
   s.extra_rdoc_files = Dir['*.txt']
-  s.files = Dir['{bin,examples,lib,nbproject,test/**/*'] + Dir['{*.txt,*.gemspec,Rakefile}']
+  s.files = Dir['{bin,examples,lib,nbproject,test}/**/*'] + Dir['{*.txt,*.gemspec,Rakefile}']
+  puts s.files
   s.homepage = %q{http://kenai.com/projects/jvmscript}
   s.rdoc_options = ["--main", "README.txt"]
   s.require_paths = ["lib"]
