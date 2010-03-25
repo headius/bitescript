@@ -18,9 +18,9 @@ end
 
 macro :end_timing do |i|
   load_time
-  lload 2
+  lload i
   lsub
-  lstore 2
+  lstore i
 end
 
 macro :load_times do
