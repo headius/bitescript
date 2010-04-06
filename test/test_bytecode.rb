@@ -311,7 +311,7 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_try_catch_block, a_lbl.label, b_lbl.label, c_lbl.label, "java/lang/Integer"], @dummy.single {trycatch a_lbl, b_lbl, c_lbl, Integer})
   end
   
-  def test_jump_insns
+  def test_backward_jump_insns
     a_lbl = label :a
     assert_equal([:visit_jump_insn, Opcodes::GOTO, a_lbl.label], @dummy.single {goto a_lbl})
     assert_equal([:visit_jump_insn, Opcodes::IFEQ, a_lbl.label], @dummy.single {ifeq a_lbl})
@@ -350,8 +350,68 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_jump_insn, Opcodes::IFNULL, a_lbl.label], @dummy.single {ifnull :a})
     assert_equal([:visit_jump_insn, Opcodes::IFNONNULL, a_lbl.label], @dummy.single {ifnonnull :a})
     assert_equal([:visit_jump_insn, Opcodes::JSR, a_lbl.label], @dummy.single {jsr :a})
+
+    # should already have been set above at label :a
+    assert_raises(RuntimeError) {a_lbl.set!}
+  end
     
-    assert_equal([:visit_label, a_lbl.label], @dummy.single {a_lbl.set!})
+  def test_forward_jump_insns
+    # allow forward references to as-yet-unset labels
+    lbl = nil
+    result = @dummy.single {goto :a1; lbl = labels[:a1]}
+    assert_equal([:visit_jump_insn, Opcodes::GOTO, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a1})
+    result = @dummy.single {ifeq :a2; lbl = labels[:a2]}
+    assert_equal([:visit_jump_insn, Opcodes::IFEQ, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a2})
+    result = @dummy.single {ifne :a3; lbl = labels[:a3]}
+    assert_equal([:visit_jump_insn, Opcodes::IFNE, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a3})
+    result = @dummy.single {ifle :a4; lbl = labels[:a4]}
+    assert_equal([:visit_jump_insn, Opcodes::IFLE, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a4})
+    result = @dummy.single {iflt :a5; lbl = labels[:a5]}
+    assert_equal([:visit_jump_insn, Opcodes::IFLT, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a5})
+    result = @dummy.single {ifge :a6; lbl = labels[:a6]}
+    assert_equal([:visit_jump_insn, Opcodes::IFGE, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a6})
+    result = @dummy.single {ifgt :a7; lbl = labels[:a7]}
+    assert_equal([:visit_jump_insn, Opcodes::IFGT, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a7})
+    result = @dummy.single {if_acmpeq :a8; lbl = labels[:a8]}
+    assert_equal([:visit_jump_insn, Opcodes::IF_ACMPEQ, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a8})
+    result = @dummy.single {if_acmpne :a9; lbl = labels[:a9]}
+    assert_equal([:visit_jump_insn, Opcodes::IF_ACMPNE, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a9})
+    result = @dummy.single {if_icmpeq :a10; lbl = labels[:a10]}
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPEQ, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a10})
+    result = @dummy.single {if_icmpne :a11; lbl = labels[:a11]}
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPNE, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a11})
+    result = @dummy.single {if_icmplt :a12; lbl = labels[:a12]}
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPLT, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a12})
+    result = @dummy.single {if_icmpgt :a13; lbl = labels[:a13]}
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPGT, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a13})
+    result = @dummy.single {if_icmple :a14; lbl = labels[:a14]}
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPLE, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a14})
+    result = @dummy.single {if_icmpge :a15; lbl = labels[:a15]}
+    assert_equal([:visit_jump_insn, Opcodes::IF_ICMPGE, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a15})
+    result = @dummy.single {ifnull :a16; lbl = labels[:a16]}
+    assert_equal([:visit_jump_insn, Opcodes::IFNULL, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a16})
+    result = @dummy.single {ifnonnull :a17; lbl = labels[:a17]}
+    assert_equal([:visit_jump_insn, Opcodes::IFNONNULL, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a17})
+    result = @dummy.single {jsr :a18; lbl = labels[:a18]}
+    assert_equal([:visit_jump_insn, Opcodes::JSR, lbl.label], result)
+    assert_equal([:visit_label, lbl.label], @dummy.single {label :a18})
   end
 
   def test_multidim_array
