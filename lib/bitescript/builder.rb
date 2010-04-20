@@ -221,8 +221,12 @@ module BiteScript
       if @interface
         flags = Opcodes::ACC_INTERFACE | Opcodes::ACC_ABSTRACT
       end
-      
+
       @class_writer = ClassWriter.new(ClassWriter::COMPUTE_MAXS)
+      if ENV['BS_CHECK_CLASSES']
+        @real_class_writer = @class_writer
+        @class_writer = CheckClassAdapter.new(@class_writer)
+      end
       
       interface_paths = []
       (@interfaces).each {|interface| interface_paths << path(interface)}
@@ -270,7 +274,12 @@ module BiteScript
     end
     
     def generate
-      String.from_java_bytes(@class_writer.to_byte_array)
+      if ENV['BS_CHECK_CLASSES']
+        class_writer = @real_class_writer
+      else
+        class_writer = @class_writer
+      end
+      String.from_java_bytes(class_writer.to_byte_array)
     end
 
     %w[public private protected].each do |modifier|
