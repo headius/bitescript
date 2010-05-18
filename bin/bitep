@@ -1,0 +1,15 @@
+#!/usr/bin/env jruby
+begin
+  require 'bitescript'
+rescue LoadError
+  $: << File.dirname(File.dirname(__FILE__)) + '/lib'
+  require 'bitescript'
+end
+
+file = ARGV[0]
+
+raise "usage: bitep <class_name>" unless file
+
+cb = BiteScript::ASM::ClassMirror::Builder.new
+BiteScript::ASM::ClassReader.new(ARGV[0]).accept(cb, 3)
+puts cb.mirror.inspect

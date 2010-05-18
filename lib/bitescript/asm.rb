@@ -13,5 +13,10 @@ module BiteScript
     end
     java_import asm_package.Label
     java_import asm_package.Type
+    java_import asm_package.AnnotationVisitor
+    java_import asm_package.ClassVisitor
+    java_import asm_package.FieldVisitor
+    java_import asm_package.MethodVisitor
+    java_import asm_package.ClassReader
   end
 end

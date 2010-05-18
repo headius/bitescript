@@ -3,6 +3,7 @@ require 'bitescript/asm'
 require 'bitescript/signature'
 require 'bitescript/bytecode'
 require 'bitescript/builder'
+require 'bitescript/mirror'
 
 module BiteScript
   VERSION = '0.0.4'
