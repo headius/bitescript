@@ -175,6 +175,13 @@ module BiteScript::ASM
       @interfaces = []
     end
 
+    def self.load(name_or_bytes)
+      builder = BiteScript::ASM::ClassMirror::Builder.new
+      BiteScript::ASM::ClassReader.new(name_or_bytes).accept(builder, 3)
+      builder.mirror
+    end
+    alias for_name load
+
     def getConstructor(*arg_types)
       @constructors[arg_types]
     end
