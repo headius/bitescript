@@ -62,23 +62,29 @@ module BiteScript
   module Annotatable
     java_import "java.lang.annotation.Retention"
     def annotate(cls, runtime=nil)
-      if Java::JavaClass === cls
-        java_class = cls
-      else
-        java_class = cls.java_class
-      end
-      
       if runtime.nil?
-        retention = java_class.annotation(Retention.java_class)
-        return if retention && retention.value.name == 'CLASS'
-        runtime = retention && retention.value.name == 'RUNTIME'
+        retention = find_retention(cls)
+        return if retention == 'SOURCE'
+        runtime = retention == 'RUNTIME'
       end
 
-      annotation = visit_annotation(Signature.ci(java_class), runtime)
+      annotation = visit_annotation(Signature.ci(cls), runtime)
       annotation.extend AnnotationBuilder
 
       yield annotation
       annotation.visit_end
+    end
+
+    def find_retention(cls)
+      if cls.kind_of?(BiteScript::ASM::ClassMirror)
+        retention = cls.getDeclaredAnnotation('java.lang.annotation.Retention')
+      elsif Java::JavaClass === cls
+        retention = cls.annotation(Retention.java_class)
+      else
+        retention = cls.java_class.annotation(Retention.java_class)
+      end
+      return 'CLASS' if retention.nil?
+      return retention.value.name
     end
   end
   

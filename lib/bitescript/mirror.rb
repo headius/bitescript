@@ -114,7 +114,7 @@ module BiteScript::ASM
     end
 
     def addAnnotation(annotation)
-      annotations[annotation.type] = annotation
+      annotations[annotation.type.class_name] = annotation
     end
 
     def getDeclaredAnnotation(name)
@@ -139,11 +139,11 @@ module BiteScript::ASM
         end
       EOF
     end
-    %w(annotation bridge deprecated enum interface).each do |name|
+    %w(annotation bridge deprecated enum interface synthetic).each do |name|
       add_modifier(name)
     end
     code = ''
-    %w(Public Private Protected Final Native 
+    %w(Public Private Protected Final Native Abstract
        Static Strict Synchronized Transient Volatile).each do |name|
       add_modifier(name)
       code << "modifiers << '#{name.downcase} ' if #{name.downcase}?\n"
@@ -210,10 +210,14 @@ module BiteScript::ASM
     end
 
     def addMethod(method)
+      # TODO this is a hack to fix resolution of covariant returns.
+      # We should properly support methods that only differ by return type.
+      return if method.synthetic?
+      type_names = method.argument_types.map {|type| type.class_name}
       if method.name == '<init>'
-        @constructors[method.parameters] = method
+        @constructors[type_names] = method
       else
-        @methods[method.name][method.parameters] = method
+        @methods[method.name][type_names] = method
       end
     end
 
@@ -265,7 +269,7 @@ module BiteScript::ASM
 
       def visit(version, access, name, signature, super_name, interfaces)
         @current = @class = ClassMirror.new(Type.getObjectType(name), access)
-        @class.superclass = Type.getObjectType(super_name)
+        @class.superclass = Type.getObjectType(super_name) if super_name
         if interfaces
           interfaces.each do |i|
             @class.interfaces << Type.getObjectType(i)
@@ -290,7 +294,7 @@ module BiteScript::ASM
       end
 
       def visitField(flags, name, desc, signature, value)
-        @current = FieldMirror.new(@class, flags, name, Type.getType(desc), value)
+        @current = FieldMirror.new(@class.type, flags, name, Type.getType(desc), value)
         @class.addField(@current)
         self
       end
@@ -300,10 +304,14 @@ module BiteScript::ASM
         parameters = Type.getArgumentTypes(desc).to_a
         exceptions = (exceptions || []).map {|e| Type.getObjectType(e)}
         @current = MethodMirror.new(
-            @class, flags, return_type, name, parameters, exceptions)
+            @class.type, flags, return_type, name, parameters, exceptions)
         @class.addMethod(@current)
         # TODO parameter annotations, default value, etc.
-        self
+        self  # This isn't legal is it?
+      end
+
+      def to_s
+        "ClassMirror(#{type.class_name})"
       end
     end
   end
@@ -330,14 +338,15 @@ module BiteScript::ASM
     include Modifiers
     include Annotated
 
-    attr_reader :declaring_class, :name, :return_type, :parameters, :exceptions
+    attr_reader :declaring_class, :name, :return_type
+    attr_reader :argument_types, :exception_types
     def initialize(klass, flags, return_type, name, parameters, exceptions)
       @flags = flags
       @declaring_class = klass
       @name = name
       @return_type = return_type
-      @parameters = parameters
-      @exceptions = exceptions
+      @argument_types = parameters
+      @exception_types = exceptions
     end
 
     def inspect
@@ -346,7 +355,7 @@ module BiteScript::ASM
         modifier_string,
         return_type.class_name,
         name,
-        parameters.map {|x| x.class_name}.join(', '),
+        argument_types.map {|x| x.class_name}.join(', '),
       ]
     end
   end
