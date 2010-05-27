@@ -33,6 +33,9 @@ module BiteScript
     module_function :path
     
     def class_id(cls)
+      return cls.descriptor if cls.kind_of?(BiteScript::ASM::Type)
+      return cls.type.descriptor if cls.kind_of?(BiteScript::ASM::ClassMirror)
+
       cls = cls.java_class if Class === cls
       
       if !cls || cls == java.lang.Void.java_class || Java::void == cls
