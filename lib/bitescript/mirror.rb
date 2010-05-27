@@ -213,7 +213,7 @@ module BiteScript::ASM
       # TODO this is a hack to fix resolution of covariant returns.
       # We should properly support methods that only differ by return type.
       return if method.synthetic?
-      type_names = method.argument_types.map {|type| type.class_name}
+      type_names = method.argument_types.map {|type| type.descriptor}
       if method.name == '<init>'
         @constructors[type_names] = method
       else
