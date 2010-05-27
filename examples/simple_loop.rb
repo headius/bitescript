@@ -4,7 +4,7 @@ include BiteScript
 
 fb = FileBuilder.build(__FILE__) do
   public_class "SimpleLoop" do
-    public_static_method "main", void, string[] do
+    public_static_method "main", [], void, string[] do
       aload 0
       push_int 0
       aaload

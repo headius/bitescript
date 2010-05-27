@@ -18,9 +18,9 @@ end
 
 macro :end_timing do |i|
   load_time
-  lload 2
+  lload i
   lsub
-  lstore 2
+  lstore i
 end
 
 macro :load_times do
@@ -58,7 +58,7 @@ main do
   returnvoid
 end
 
-public_static_method "fib", int, int do
+public_static_method "fib", [], int, int do
   iload 0
   ldc 2
   recurse = label

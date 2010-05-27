@@ -203,14 +203,7 @@ module BiteScript
     include Util
     include QuickTypes
     include Annotatable
-
-    begin
-      java_import "jruby.objectweb.asm.Opcodes"
-      java_import "jruby.objectweb.asm.ClassWriter"
-    rescue
-      java_import "org.objectweb.asm.Opcodes"
-      java_import "org.objectweb.asm.ClassWriter"
-    end
+    include ASM
     
     java_import java.lang.Object
     java_import java.lang.Void
@@ -234,8 +227,12 @@ module BiteScript
       if @interface
         flags = Opcodes::ACC_INTERFACE | Opcodes::ACC_ABSTRACT
       end
-      
+
       @class_writer = ClassWriter.new(ClassWriter::COMPUTE_MAXS)
+      if ENV['BS_CHECK_CLASSES']
+        @real_class_writer = @class_writer
+        @class_writer = CheckClassAdapter.new(@class_writer)
+      end
       
       interface_paths = []
       (@interfaces).each {|interface| interface_paths << path(interface)}
@@ -283,7 +280,12 @@ module BiteScript
     end
     
     def generate
-      String.from_java_bytes(@class_writer.to_byte_array)
+      if ENV['BS_CHECK_CLASSES']
+        class_writer = @real_class_writer
+      else
+        class_writer = @class_writer
+      end
+      String.from_java_bytes(class_writer.to_byte_array)
     end
 
     %w[public private protected].each do |modifier|
@@ -422,15 +424,10 @@ module BiteScript
   end
   
   class MethodBuilder
-    begin
-      java_import "jruby.objectweb.asm.Opcodes"
-    rescue
-      java_import "org.objectweb.asm.Opcodes"
-    end
-
     include QuickTypes
     include Annotatable
     include BiteScript::Bytecode
+    include ASM
     
     attr_reader :method_visitor
     attr_reader :static

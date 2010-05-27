@@ -345,11 +345,18 @@ module BiteScript
       def initialize(method_visitor)
         @method_visitor = method_visitor
         @label = ASM::Label.new
+        @set = false
       end
       
       def set!
+        raise "label set twice" if @set
+        @set = true
         @method_visitor.visit_label(@label)
         self
+      end
+      
+      def set?
+        @set
       end
     end
 
@@ -358,18 +365,18 @@ module BiteScript
     end
 
     def sym_to_label(id)
-      lbl = labels[id] or raise "Unknown label '#{id}'"
+      lbl = labels[id]
+      unless lbl
+        lbl = labels[id] = label
+      end
+      lbl
     end
     
     def label(id = nil)
       if id
-        label = labels[id]
-        if label
-          raise "Duplicate label '#{id}'"
-        end
-        label = labels[id] = SmartLabel.new(method_visitor)
-        label.set!
-        label
+        lbl = sym_to_label(id)
+        lbl.set!
+        lbl
       else
         return SmartLabel.new(method_visitor)
       end

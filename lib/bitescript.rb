@@ -6,8 +6,6 @@ require 'bitescript/builder'
 require 'bitescript/mirror'
 
 module BiteScript
-  VERSION = '0.0.4'
-
   include BiteScript::ASM
   JAVA1_4 = Opcodes::V1_4
   JAVA1_5 = Opcodes::V1_5

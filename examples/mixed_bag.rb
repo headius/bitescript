@@ -10,7 +10,7 @@ builder = BiteScript::FileBuilder.build("somefile.source") do
     public_class "MyClass", object do
       public_field "list", ArrayList
 
-      public_constructor string, ArrayList do
+      public_constructor [], string, ArrayList do
         aload 0
         invokespecial object, "<init>", [void]
         aload 0
@@ -23,7 +23,7 @@ builder = BiteScript::FileBuilder.build("somefile.source") do
         returnvoid
       end
 
-      public_static_method "foo", this, string do
+      public_static_method "foo", [], this, string do
         new this
         dup
         aload 0
@@ -34,7 +34,7 @@ builder = BiteScript::FileBuilder.build("somefile.source") do
         areturn
       end
 
-      public_method "bar", ArrayList, string, ArrayList do
+      public_method "bar", [], ArrayList, string, ArrayList do
         aload 1
         invokevirtual(string, "toLowerCase", string)
         aload 2
@@ -44,13 +44,13 @@ builder = BiteScript::FileBuilder.build("somefile.source") do
         areturn
       end
 
-      public_method("getList", ArrayList) do
+      public_method("getList", [], ArrayList) do
         aload 0
         getfield this, "list", ArrayList
         areturn
       end
 
-      public_static_method("main", void, string[]) do
+      public_static_method("main", [], void, string[]) do
         aload 0
         ldc_int 0
         aaload
