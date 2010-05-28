@@ -96,6 +96,7 @@ module BiteScript::ASM
       def visitArray(name)
         array = @current[name] = []
         @current = ValueArray.new(@current, array)
+        self
       end
 
       def visitEnum(name, desc, value)
@@ -103,7 +104,7 @@ module BiteScript::ASM
       end
 
       def visitEnd
-        @current = @annotation.parent
+        @current = @current.parent
       end
     end
   end
@@ -309,6 +310,8 @@ module BiteScript::ASM
         # TODO parameter annotations, default value, etc.
         self  # This isn't legal is it?
       end
+
+      def visitAnnotationDefault(*args);end
 
       def to_s
         "ClassMirror(#{type.class_name})"
