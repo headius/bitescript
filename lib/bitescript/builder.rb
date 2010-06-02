@@ -570,7 +570,7 @@ module BiteScript
       visit k, v
     end
     def annotation(name, cls)
-      if Java::JavaClass === cls
+      if Java::JavaClass === cls || BiteScript::ASM::Type === cls
         java_class = cls
       else
         java_class = cls.java_class

@@ -89,7 +89,9 @@ module BiteScript::ASM
       end
 
       def visitAnnotation(name, desc)
-        @current = AnnotationMirror.new(Type.getType(desc), @current)
+        child = AnnotationMirror.new(Type.getType(desc), @current)
+        @current[name] = child
+        @current = child
         self
       end
 
