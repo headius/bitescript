@@ -1,3 +1,9 @@
+=== 0.0.6 / 2010-06-09
+
+* Move to a class mirror API rather than loading and walking real classes
+* Bug fixes for annotations
+* Allow forward references to labels for easier branch logic
+
 === 0.0.5 / 2010-02-04
 
 * Get tests and examples all working nicely again
