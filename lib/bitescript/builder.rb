@@ -78,6 +78,9 @@ module BiteScript
     def find_retention(cls)
       if cls.kind_of?(BiteScript::ASM::ClassMirror)
         retention = cls.getDeclaredAnnotation('java.lang.annotation.Retention')
+      elsif cls.kind_of?(BiteScript::ASM::Type)
+        mirror = BiteScript::ASM::ClassMirror.for_name(cls.class_name)
+        return find_retention(mirror) if mirror
       elsif Java::JavaClass === cls
         retention = cls.annotation(Retention.java_class)
       else
