@@ -333,7 +333,28 @@ module BiteScript
     def static_init(&block)
       method(Opcodes::ACC_STATIC, "<clinit>", [void], [], &block)
     end
-    
+
+    def build_method(name, visibility, static, exceptions, type, *args)
+      flags =
+        case visibility
+        when :public; Opcodes::ACC_PUBLIC
+        when :private; Opcodes::ACC_PRIVATE
+        when :protected; Opcodes::ACC_PROTECTED
+        end
+      flags |= Opcodes::ACC_STATIC if static
+      method(flags, name, [type, *args], exceptions)
+    end
+
+    def build_constructor(visibility, exceptions, *args)
+      flags =
+        case visibility
+        when :public; Opcodes::ACC_PUBLIC
+        when :private; Opcodes::ACC_PRIVATE
+        when :protected; Opcodes::ACC_PROTECTED
+        end
+      @constructor = method(flags, "<init>", [nil, *args], exceptions)
+    end
+
     def method(flags, name, signature, exceptions, &block)
       flags |= Opcodes::ACC_ABSTRACT if interface?
       mb = MethodBuilder.new(self, flags, name, exceptions, signature)
