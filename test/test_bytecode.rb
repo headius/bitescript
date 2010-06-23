@@ -82,6 +82,8 @@ class TestBytecode < Test::Unit::TestCase
     assert_equal([:visit_ldc_insn, java.lang.Double.new(1)], @dummy.single {ldc(1.0)})
 
     assert_equal([:visit_ldc_insn, BiteScript::ASM::Type.get_type(System.java_class)], @dummy.single {ldc(System)})
+    type = BiteScript::ASM::Type.get_type('Lcom.example.Test;')
+    assert_equal([:visit_ldc_insn, type], @dummy.single {ldc(type)})
   end
 
   def test_int_insns
