@@ -183,7 +183,7 @@ module BiteScript
         # type instructions
         line = __LINE__; eval "
             def #{const_down}(type)
-              method_visitor.visit_type_insn(Opcodes::#{const_name}, path(type))
+              method_visitor.visit_type_insn(Opcodes::#{const_name}, tipath(type))
               #{OpcodeStackDeltas[const_name]}
             end
           ", b, __FILE__, line

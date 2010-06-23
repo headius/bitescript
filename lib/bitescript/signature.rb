@@ -18,7 +18,18 @@ module BiteScript
       path.gsub('/', '.')
     end
     module_function :classname
-    
+
+    def type_insn_path(cls)
+      descriptor = class_id(cls)
+      if descriptor[0, 1] == '['
+        descriptor
+      else
+        path(cls)
+      end
+    end
+    alias tipath type_insn_path
+    module_function :type_insn_path, :tipath
+
     def path(cls)
       case cls
       when Symbol
@@ -42,7 +53,7 @@ module BiteScript
         return "V"
       end
       
-      if Module === cls
+      if Module === cls || Symbol === cls
         return "L#{path(cls)};"
       end
       
