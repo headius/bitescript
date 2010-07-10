@@ -1,3 +1,5 @@
+require 'jruby'
+
 module BiteScript::ASM
   class EnumValue
     attr_reader :declaring_type, :name
@@ -180,6 +182,13 @@ module BiteScript::ASM
 
     def self.load(name_or_bytes)
       builder = BiteScript::ASM::ClassMirror::Builder.new
+      if name_or_bytes.kind_of?(String)
+        classname = name_or_bytes.tr('.', '/') + ".class"
+        stream = JRuby.runtime.jruby_class_loader.getResourceAsStream(
+            classname)
+        raise NameError, "Class '#{name_or_bytes}' not found." unless stream
+        name_or_bytes = stream
+      end
       BiteScript::ASM::ClassReader.new(name_or_bytes).accept(builder, 3)
       builder.mirror
     end

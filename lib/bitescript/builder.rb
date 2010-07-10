@@ -79,7 +79,7 @@ module BiteScript
       if cls.kind_of?(BiteScript::ASM::ClassMirror)
         retention = cls.getDeclaredAnnotation('java.lang.annotation.Retention')
       elsif cls.kind_of?(BiteScript::ASM::Type)
-        mirror = BiteScript::ASM::ClassMirror.for_name(cls.class_name)
+        mirror = BiteScript::ASM::ClassMirror.for_name(cls.class_name) rescue nil
         return find_retention(mirror) if mirror
       elsif Java::JavaClass === cls
         retention = cls.annotation(Retention.java_class)
