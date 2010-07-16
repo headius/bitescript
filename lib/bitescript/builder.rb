@@ -232,10 +232,6 @@ module BiteScript
       end
 
       @class_writer = ClassWriter.new(ClassWriter::COMPUTE_MAXS)
-      if ENV['BS_CHECK_CLASSES']
-        @real_class_writer = @class_writer
-        @class_writer = CheckClassAdapter.new(@class_writer)
-      end
       
       interface_paths = []
       (@interfaces).each {|interface| interface_paths << path(interface)}
@@ -283,12 +279,15 @@ module BiteScript
     end
     
     def generate
+      bytes = @class_writer.to_byte_array
       if ENV['BS_CHECK_CLASSES']
-        class_writer = @real_class_writer
-      else
-        class_writer = @class_writer
+        BiteScript::ASM::CheckClassAdapter.verify(
+            BiteScript::ASM::ClassReader.new(bytes),
+            JRuby.runtime.jruby_class_loader,
+            false,
+            java.io.PrintWriter.new(java.lang.System.out, true))
       end
-      String.from_java_bytes(class_writer.to_byte_array)
+      String.from_java_bytes(bytes)
     end
 
     %w[public private protected].each do |modifier|
