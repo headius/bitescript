@@ -227,6 +227,7 @@ module BiteScript
       @interfaces = opts[:interfaces] || []
       @interface = opts[:interface]
       flags = Opcodes::ACC_SUPER
+      flags |= Opcodes::ACC_ABSTRACT if opts[:abstract]
       if @interface
         flags = Opcodes::ACC_INTERFACE | Opcodes::ACC_ABSTRACT
       end
