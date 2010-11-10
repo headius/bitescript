@@ -472,8 +472,8 @@ module BiteScript
       @next_local = 0
       
       @static = (modifiers & Opcodes::ACC_STATIC) != 0
-      @start_label = labels[:start] = self.label
-      @end_label = labels[:end] = self.label
+      @start_label = labels[:_start] = self.label
+      @end_label = labels[:_end] = self.label
       @exceptions = exceptions || []
     end
 

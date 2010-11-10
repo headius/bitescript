@@ -60,7 +60,6 @@ class TestBuilder < Test::Unit::TestCase
   def test_sync_ops
     # TODO figure out what's wrong with this and add error cases
     assert_equal 'ok', try(JString) {
-      after = label
       ldc 'ok'
       astore 0
       ldc 'ok'
@@ -70,14 +69,14 @@ class TestBuilder < Test::Unit::TestCase
       label :begin
       ldc 'ok'
       astore 1
-      goto after
+      goto :after
       label :finally
       pop
       aload 0
 #      monitorexit
       trycatch(:begin, :finally, :finally, nil)
-      trycatch(:finally, :end, :finally, nil)
-      after.set!
+      trycatch(:finally, :after, :finally, nil)
+      label :after
       aload 1
       areturn
     }
