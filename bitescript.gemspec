@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{bitescript}
-  s.version = "0.0.6"
+  s.version = "0.0.7"
   s.authors = ["Charles Oliver Nutter", "Ryan Brown"]
   s.date = Time.now.strftime('YYYY-MM-DD')
   s.description = %q{BiteScript is a Ruby DSL for generating Java bytecode and classes.}
