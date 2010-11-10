@@ -1,6 +1,6 @@
 = bitescript
 
-http://kenai.com/projects/jvmscript
+http://github.com/headius/bitescript
 
 == DESCRIPTION:
 

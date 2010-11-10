@@ -1,3 +1,9 @@
+=== 0.0.7 / 2010-11-10
+
+* Fix some likely label collisions
+* Class mirror and annotation fixes
+* Post-generate verification
+
 === 0.0.6 / 2010-06-09
 
 * Move to a class mirror API rather than loading and walking real classes
