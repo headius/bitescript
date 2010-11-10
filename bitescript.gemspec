@@ -10,8 +10,7 @@ Gem::Specification.new do |s|
   s.executables = ["bite", "bitec"]
   s.extra_rdoc_files = Dir['*.txt']
   s.files = Dir['{bin,examples,lib,nbproject,test}/**/*'] + Dir['{*.txt,*.gemspec,Rakefile}']
-  puts s.files
-  s.homepage = %q{http://kenai.com/projects/jvmscript}
+  s.homepage = %q{http://github.com/headius/bitescript}
   s.rdoc_options = ["--main", "README.txt"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{jruby-extras}
