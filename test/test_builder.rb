@@ -305,21 +305,27 @@ class TestBuilder < Test::Unit::TestCase
 
     cb.public_field('inst_field', JString)
     cb.public_static_field('static_field', JString)
+    cb.public_static_final_field('static_final_field', JString)
 
     cb.public_method('set_inst', [], cb.void) {aload 0; ldc 'instance'; putfield this, 'inst_field', JString; returnvoid}
     cb.public_method('set_static', [], cb.void) {ldc 'static'; putstatic this, 'static_field', JString; returnvoid}
+    cb.public_method('set_static_final', [], cb.void){ldc 'static final'; putstatic this, 'static_final_field', JString; returnvoid}
     cb.public_method('get_inst', [], JString) {aload 0; getfield this, 'inst_field', JString; areturn}
     cb.public_method('get_static', [], JString) {getstatic this, 'static_field', JString; areturn}
+    cb.public_method('get_static_final', [], JString) {getstatic this, 'static_final_field', JString; areturn}
 
     dummy_constructor(cb)
     obj = load_and_construct(@class_name, cb);
 
     assert_equal nil, obj.get_inst
     assert_equal nil, obj.get_static
+    assert_equal nil, obj.get_static_final
     obj.set_inst
     obj.set_static
+    obj.set_static_final
     assert_equal 'instance', obj.get_inst
     assert_equal 'static', obj.get_static
+    assert_equal 'static final', obj.get_static_final
   end
 
   def test_arrays
