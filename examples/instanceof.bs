@@ -1,0 +1,13 @@
+main do
+  ldc 'hello'
+  instanceof java.lang.CharSequence
+  ifeq :not
+  ldc 'is instance of!'
+  aprintln
+  goto :end
+  label :not
+  ldc 'not instance of!'
+  aprintln
+  label :end
+  returnvoid
+end
