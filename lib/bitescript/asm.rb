@@ -23,5 +23,8 @@ module BiteScript
     java_import asm_package.ClassReader
     java_import asm_package.ClassWriter
     java_import asm_package.util.CheckClassAdapter
+    java_import asm_package.signature.SignatureReader
+    java_import asm_package.signature.SignatureVisitor
+    java_import asm_package.signature.SignatureWriter
   end
 end

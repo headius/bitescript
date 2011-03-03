@@ -168,7 +168,7 @@ module BiteScript::ASM
     include Modifiers
 
     attr_reader :type, :interfaces
-    attr_accessor :superclass
+    attr_accessor :superclass, :signature
 
     def initialize(type, flags)
       super()
@@ -248,6 +248,18 @@ module BiteScript::ASM
       @fields[field.name] = field
     end
 
+    def type_parameters
+      signature.type_parameters is signature
+    end
+
+    def generic_superclass
+      signature.superclass if signature
+    end
+
+    def generic_interfaces
+      signature.interfaces if signature
+    end
+
     def inspect
       if annotation?
         kind = "@interface"
@@ -285,6 +297,7 @@ module BiteScript::ASM
       def visit(version, access, name, signature, super_name, interfaces)
         @current = @class = ClassMirror.new(Type.getObjectType(name), access)
         @class.superclass = Type.getObjectType(super_name) if super_name
+        @class.signature = SignatureMirror.new(signature) if signature
         if interfaces
           interfaces.each do |i|
             @class.interfaces << Type.getObjectType(i)
@@ -309,7 +322,8 @@ module BiteScript::ASM
       end
 
       def visitField(flags, name, desc, signature, value)
-        @current = FieldMirror.new(@class.type, flags, name, Type.getType(desc), value)
+        signature = GenericTypeBuilder.read(signature)
+        @current = FieldMirror.new(@class.type, flags, name, Type.getType(desc), signature, value)
         @class.addField(@current)
         self
       end
@@ -318,8 +332,9 @@ module BiteScript::ASM
         return_type = Type.getReturnType(desc)
         parameters = Type.getArgumentTypes(desc).to_a
         exceptions = (exceptions || []).map {|e| Type.getObjectType(e)}
+        signature = SignatureMirror.new(signature) if signature
         @current = MethodMirror.new(
-            @class.type, flags, return_type, name, parameters, exceptions)
+            @class.type, flags, return_type, name, parameters, exceptions, signature)
         @class.addMethod(@current)
         # TODO parameter annotations, default value, etc.
         self  # This isn't legal is it?
@@ -337,13 +352,18 @@ module BiteScript::ASM
     include Modifiers
     include Annotated
 
-    attr_reader :declaring_class, :name, :type, :value
-    def initialize(klass, flags, name, type, value)
+    attr_reader :declaring_class, :name, :type, :value, :signature
+    def initialize(klass, flags, name, type, signature, value)
       @declaring_class = klass
       @flags = flags
       @name = name
       @type = type
       @value = value
+      @signature = signature
+    end
+
+    def generic_type
+      signature
     end
 
     def inspect
@@ -356,14 +376,31 @@ module BiteScript::ASM
     include Annotated
 
     attr_reader :declaring_class, :name, :return_type
-    attr_reader :argument_types, :exception_types
-    def initialize(klass, flags, return_type, name, parameters, exceptions)
+    attr_reader :argument_types, :exception_types, :signature
+
+    def initialize(klass, flags, return_type, name, parameters, exceptions, signature)
       @flags = flags
       @declaring_class = klass
       @name = name
       @return_type = return_type
       @argument_types = parameters
       @exception_types = exceptions
+    end
+
+    def generic_parameter_types
+      signature.parameter_types if signature
+    end
+
+    def generic_return_type
+      signature.return_type if signature
+    end
+
+    def generic_exception_types
+      signature.exception_types if signature
+    end
+
+    def type_parameters
+      signature.type_parameters is signature
     end
 
     def inspect
@@ -374,6 +411,239 @@ module BiteScript::ASM
         name,
         argument_types.map {|x| x.class_name}.join(', '),
       ]
+    end
+  end
+
+  class SignatureMirror
+    include BiteScript::ASM::SignatureVisitor
+
+    attr_reader :type_parameters
+    attr_reader :parameter_types, :return_type, :exception_types
+    attr_reader :superclass, :interfaces
+
+    def method?
+      return_type != nil
+    end
+
+    def class?
+      superclass != nil
+    end
+
+    def initialize(signature=nil)
+      @type_parameters = []
+      @parameter_types = []
+      @exception_types = []
+      @interfaces = []
+      if (signature)
+        reader = BiteScript::ASM::SignatureReader.new(signature)
+        reader.accept(self)
+      end
+    end
+
+    def visitFormalTypeParameter(name)
+      type_parameters << TypeVariable.new(name)
+    end
+
+    def visitClassBound
+      GenericTypeBuilder.new {|bound| type_parameters[-1].bounds << bound}
+    end
+
+    def visitInterfaceBound
+      GenericTypeBuilder.new {|bound| type_parameters[-1].bounds << bound}
+    end
+
+    def visitParameterType
+      GenericTypeBuilder.new {|type| parameter_types << type}
+    end
+
+    def visitReturnType
+      GenericTypeBuilder.new {|type| @return_type = type}
+    end
+
+    def visitExceptionType
+      GenericTypeBuilder.new {|type| exception_types << type}
+    end
+
+    def visitSuperclass
+      GenericTypeBuilder.new {|type| @superclass = type}
+    end
+
+    def visitInterface
+      GenericTypeBuilder.new {|type| interfaces << type}
+    end
+  end
+
+  class GenericTypeMirror
+    def array?
+      false
+    end
+    def wildcard?
+      false
+    end
+    def generic_class?
+      false
+    end
+    def type_variable?
+      false
+    end
+    def inspect
+      "<#{self.class.name} #{to_s}>"
+    end
+  end
+
+  class TypeVariable < GenericTypeMirror
+    attr_reader :name, :bounds
+    def initialize(name)
+      @name = name
+      @bounds = []
+    end
+    def type_variable?
+      true
+    end
+
+    def to_s
+      result = "#{name}"
+      unless bounds.empty?
+        result << ' extends ' << bounds.map {|b| b.to_s}.join(' & ')
+      end
+      result
+    end
+  end
+
+  class GenericArray < GenericTypeMirror
+    attr_accessor :component_type
+    def array?
+      true
+    end
+    def to_s
+      "#{component_type}[]"
+    end
+  end
+
+  class Wildcard < GenericTypeMirror
+    attr_reader :lower_bound, :upper_bound
+    def initialize(upper_bound, lower_bound=nil)
+      @upper_bound = upper_bound
+      @lower_bound = lower_bound
+    end
+    def wildcard?
+      true
+    end
+    def to_s?
+      if lower_bound
+        "? super #{lower_bound}"
+      elsif upper_bound
+        "? extends #{upper_bound}"
+      else
+        "?"
+      end
+    end
+  end
+
+  class ParameterizedType < GenericTypeMirror
+    attr_reader :raw_type, :type_arguments, :outer_type
+
+    def initialize(raw_type, outer_type=nil)
+      @raw_type = raw_type
+      @type_arguments = []
+      @outer_type = outer_type
+    end
+
+    def descriptor
+      raw_type.descriptor
+    end
+
+    def generic_class?
+      true
+    end
+
+    def to_s
+      name = raw_type.internal_name.tr('/', '.')
+      unless type_arguments.empty?
+        name << "<#{type_arguments.map {|a| a.to_s}.join(', ')}>"
+      end
+      if outer_type
+        "#{outer_type}.#{name}"
+      else
+        name
+      end
+    end
+  end
+
+  class GenericTypeBuilder
+    include BiteScript::ASM::SignatureVisitor
+    attr_reader :result
+
+    def self.read(signature)
+      if signature
+        builder = GenericTypeBuilder.new
+        reader = BiteScript::ASM::SignatureReader.new(signature)
+        reader.accept(builder)
+        builder.result
+      end
+    end
+
+    def initialize(&block)
+      @block = block
+    end
+
+    def return_type(type)
+      @result = type
+      @block.call(type) if @block
+    end
+
+    def visitBaseType(desc)
+      return_type(Type.getType(desc.chr))
+    end
+
+    def visitArrayType
+      type = GenericArray.new
+      return_type(type)
+      GenericTypeBuilder.new {|component_type| type.component_type = component_type}
+    end
+
+    def visitTypeVariable(name)
+      return_type(TypeVariable.new(name))
+    end
+
+    def visitClassType(desc)
+      return_type(ParameterizedType.new(Type.getObjectType(desc)))
+    end
+
+    def visitTypeArgument(wildcard=nil)
+      if wildcard.nil?
+        @result.type_arguments <<
+            Wildcard.new(Type.getObjectType('java/lang/Object'))
+        return
+      end
+      GenericTypeBuilder.new do |type|
+        argument = case wildcard
+        when INSTANCEOF
+          type
+        when EXTENDS
+          Wildcard.new(type)
+        when SUPER
+          Wildcard.new(nil, type)
+        else
+          raise "Unknown wildcard #{wildcard.chr}"
+        end
+        @result.type_arguments << argument
+      end
+    end
+
+    def visitSuperclass
+      self
+    end
+
+    def visitInnerClassType(name)
+      desc = @result.descriptor.sub(/;$/, "$#{name};")
+      return_type(ParameterizedType.new(Type.getType(desc), @result))
+    end
+
+    def visitEnd
+      if @result.type_arguments.empty? && @result.outer_type.nil?
+        @result = @result.raw_type
+      end
     end
   end
 end
