@@ -228,7 +228,7 @@ module BiteScript::ASM
       # TODO this is a hack to fix resolution of covariant returns.
       # We should properly support methods that only differ by return type.
       return if method.synthetic?
-      type_names = method.argument_types.map {|type| type.descriptor}
+      type_names = method.parameter_types.map {|type| type.descriptor}
       if method.name == '<init>'
         @constructors[type_names] = method
       else
@@ -376,14 +376,14 @@ module BiteScript::ASM
     include Annotated
 
     attr_reader :declaring_class, :name, :return_type
-    attr_reader :argument_types, :exception_types, :signature
+    attr_reader :parameter_types, :exception_types, :signature
 
     def initialize(klass, flags, return_type, name, parameters, exceptions, signature)
       @flags = flags
       @declaring_class = klass
       @name = name
       @return_type = return_type
-      @argument_types = parameters
+      @parameter_types = parameters
       @exception_types = exceptions
     end
 
@@ -400,7 +400,7 @@ module BiteScript::ASM
     end
 
     def type_parameters
-      signature.type_parameters is signature
+      signature.type_parameters if signature
     end
 
     def inspect
@@ -409,7 +409,7 @@ module BiteScript::ASM
         modifier_string,
         return_type.class_name,
         name,
-        argument_types.map {|x| x.class_name}.join(', '),
+        parameter_types.map {|x| x.class_name}.join(', '),
       ]
     end
   end
