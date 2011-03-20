@@ -1,3 +1,8 @@
+=== 0.0.8 / 2011-03-05
+
+* Support parsing of generic signatures
+* Update ASM reference to work with JRuby >=1.6.0.RC3 name mangling
+
 === 0.0.7 / 2010-11-10
 
 * Fix some likely label collisions
