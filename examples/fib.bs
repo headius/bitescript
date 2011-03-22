@@ -7,17 +7,17 @@ macro :lprintln do |i|
   invokevirtual java.io.PrintStream, "println", [void, long]
 end
 
-macro :load_time do
+macro :current_time do
   invokestatic System, "currentTimeMillis", long
 end
 
 macro :start_timing do |i|
-  load_time
+  current_time
   lstore i
 end
 
 macro :end_timing do |i|
-  load_time
+  current_time
   lload i
   lsub
   lstore i
