@@ -23,7 +23,18 @@ macro :end_timing do |i|
   lstore i
 end
 
-macro :load_times do
+macro :load_iters do
+  # check args length
+  aload 0
+  arraylength
+  ifne :ok_iters
+  ldc "Usage: bite fib.bs <iters>"
+  aprintln
+  ldc 1
+  invokestatic System, 'exit', [void, int]
+  
+  # args length ok
+  label :ok_iters
   aload 0
   ldc 0
   aaload # number of times
@@ -31,7 +42,7 @@ macro :load_times do
 end
 
 main do
-  load_times
+  load_iters
   istore 1
 
   ldc "Raw bytecode fib(45) performance:"
