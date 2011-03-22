@@ -39,8 +39,7 @@ main do
 
   label :top
   iload 1
-  done = label
-  ifeq done
+  ifeq :done
   iinc 1, -1
 
   start_timing 2
@@ -54,18 +53,17 @@ main do
   lprintln 2
   goto :top
 
-  done.set!
+  label :done
   returnvoid
 end
 
 public_static_method "fib", [], int, int do
   iload 0
   ldc 2
-  recurse = label
-  if_icmpge recurse
+  if_icmpge :recurse
   iload 0
   ireturn
-  recurse.set!
+  label :recurse
   iload 0
   ldc 1
   isub
