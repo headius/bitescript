@@ -232,7 +232,7 @@ module BiteScript
         flags = Opcodes::ACC_INTERFACE | Opcodes::ACC_ABSTRACT
       end
 
-      @class_writer = ClassWriter.new(ClassWriter::COMPUTE_MAXS)
+      @class_writer = ClassWriter.new(ClassWriter::COMPUTE_FRAMES | ClassWriter::COMPUTE_MAXS)
       
       interface_paths = []
       (@interfaces).each {|interface| interface_paths << path(interface)}
