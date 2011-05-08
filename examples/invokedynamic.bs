@@ -1,0 +1,41 @@
+import java.lang.invoke.MethodHandle
+import java.lang.invoke.MethodType
+import java.lang.invoke.CallSite
+import java.lang.invoke.ConstantCallSite
+import java.lang.invoke.MethodHandles::Lookup
+JClass = java.lang.Class
+
+# Our main method, which does one invokedynamic
+main do
+  # handle for our bootstrap, which binds invokedynamic to a CallSite
+  bootstrap = mh_invokestatic this, 'bootstrap', CallSite, Lookup, string, MethodType
+
+  ldc 'Hello, invokedynamic!'
+  invokedynamic 'print', [void, string], bootstrap
+  returnvoid
+end
+
+# The method we want to invoke, prints given string
+public_static_method :print, [], void, string do
+  aload 0
+  aprintln
+  returnvoid
+end
+
+# The bootstrap method, which binds our dynamic call
+public_static_method :bootstrap, [], CallSite, Lookup, string, MethodType do
+  # Constant since we bind just once directly
+  new ConstantCallSite
+  dup
+
+  # Locate the method indicated by name + type on current class
+  aload 0   # Lookup
+  ldc this  # this class
+  aload 1   # String
+  aload 2   # MethodType
+  invokevirtual Lookup, 'findStatic', [MethodHandle, JClass, string, MethodType]
+
+  # finish constructing call site and return
+  invokespecial ConstantCallSite, '<init>', [void, MethodHandle]
+  areturn
+end

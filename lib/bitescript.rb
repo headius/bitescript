@@ -15,6 +15,8 @@ module BiteScript
   class << self
     attr_accessor :bytecode_version
 
-    BiteScript.bytecode_version = JAVA1_4
+    # Default to JVM version we're running on
+    spec_version = ENV_JAVA['java.specification.version']
+    BiteScript.bytecode_version = BiteScript.const_get("JAVA#{spec_version.gsub('.', '_')}")
   end
 end

@@ -7,7 +7,7 @@ module BiteScript
       java.lang.Class.for_name 'jruby.objectweb.asm.Opcodes'
       
       # no error, proceed with mangled name
-      asm_package = Java::jruby.objectweb.asm
+      asm_package = Java::org.objectweb.asm
       java_import asm_package.Opcodes
     rescue Exception
       begin
@@ -17,7 +17,7 @@ module BiteScript
         # no error, proceed with mangled name
         asm_package = Java::org.jruby.org.objectweb.asm
         java_import asm_package.Opcodes
-      rescue
+      rescue Exception
         # fall back on standard names
         asm_package = org.objectweb.asm
         java_import asm_package.Opcodes
@@ -35,5 +35,6 @@ module BiteScript
     java_import asm_package.signature.SignatureReader
     java_import asm_package.signature.SignatureVisitor
     java_import asm_package.signature.SignatureWriter
+    java_import asm_package.MethodHandle
   end
 end

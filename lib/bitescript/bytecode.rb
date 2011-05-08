@@ -78,7 +78,7 @@ module BiteScript
                 size = push_int value
               when Float
                 ldc_double(value)
-              when Module
+              when Module, ClassBuilder
                 ldc_class(value)
               else
                 method_visitor.visit_ldc_insn(value)
@@ -98,40 +98,24 @@ module BiteScript
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
           
-      when "INVOKESTATIC", "INVOKEVIRTUAL", "INVOKEINTERFACE", "INVOKESPECIAL", "INVOKEDYNAMIC"
+      when "INVOKESTATIC", "INVOKEVIRTUAL", "INVOKEINTERFACE", "INVOKESPECIAL"
         # method instructions
         line = __LINE__; eval "
             def #{const_down}(type, name, call_sig)
               method_visitor.visit_method_insn(Opcodes::#{const_name}, path(type), name.to_s, sig(*call_sig))
 
-              case call_sig[0]
-              when nil, Java::void, java.lang.Void
-                added = 0
-              when Java::boolean, Java::short, Java::char, Java::int, Java::float
-                added = 1
-              when Java::long, Java::double
-                added = 2
-              else
-                added = 1
-              end
+              sig_stack_net(call_sig)
+            end
+          ", b, __FILE__, line
+        OpcodeInstructions[const_name] = const_down
+        
+      when "INVOKEDYNAMIC"
+        # invokedynamic instruction
+        line = __LINE__; eval "
+            def #{const_down}(name, call_sig, handle, *args)
+              method_visitor.visit_invoke_dynamic_insn(name.to_s, sig(*call_sig), handle, args.to_java)
 
-              this_subtracted = #{const_name == 'INVOKESTATIC' ? 0 : 1}
-
-              args_subtracted = 0
-              [*call_sig][1..-1].each do |param|
-                case param
-                when nil, Java::void, java.lang.Void
-                  args_subtracted += 0
-                when Java::boolean, Java::short, Java::char, Java::int, Java::float
-                  args_subtracted += 1
-                when Java::long, Java::double
-                  args_subtracted += 2
-                else
-                  args_subtracted += 1
-                end
-              end
-
-              added - (this_subtracted + args_subtracted)
+              sig_stack_net(call_sig)
             end
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
@@ -306,7 +290,11 @@ module BiteScript
           "T_DOUBLE", "DOUBLE", "ACC_STRICT", "NULL", "T_FLOAT", "ACC_FINAL",
           "F_SAME1", "ACC_NATIVE", "F_NEW", "T_CHAR", "T_INT", "ACC_VOLATILE",
           "V1_6", "V1_5", "V1_4", "V1_3", "V1_2", "V1_1", "UNINITIALIZED_THIS",
-          "TOP", "T_SHORT", "INVOKEDYNAMIC_OWNER", "V1_7"
+          "TOP", "T_SHORT", "INVOKEDYNAMIC_OWNER", "V1_7", "MH_INVOKESPECIAL",
+          "MH_INVOKESTATIC", "MH_PUTSTATIC", "MH_GETSTATIC", "MH_PUTFIELD",
+          "MH_GETFIELD", "MH_INVOKEVIRTUAL", "MH_INVOKEINTERFACE",
+          "MH_NEWINVOKESPECIAL"
+          
         # non-instructions
 
       else
@@ -430,5 +418,73 @@ module BiteScript
         ldc_long(num)
       end
     end
+    
+    def mh_invokestatic(cls, name, *call_sig)
+      MethodHandle.new(Opcodes::MH_INVOKESTATIC, path(cls), name, sig(*call_sig))
+    end
+
+    def mh_invokevirtual(cls, name, *call_sig)
+      MethodHandle.new(Opcodes::MH_INVOKEVIRTUAL, path(cls), name, sig(*call_sig))
+    end
+
+    def mh_invokeinterface(cls, name, *call_sig)
+      MethodHandle.new(Opcodes::MH_INVOKEINTERFACE, path(cls), name, sig(*call_sig))
+    end
+
+    def mh_invokespecial(cls, name, *call_sig)
+      MethodHandle.new(Opcodes::MH_INVOKESPECIAL, path(cls), name, sig(*call_sig))
+    end
+    
+    def mh_newinvokespecial(cls, name, *call_sig)
+      MethodHandle.new(Opcodes::MH_NEWINVOKESPECIAL, path(cls), name, sig(*call_sig))
+    end
+    
+    def mh_getstatic(cls, name, *call_sig)
+      MethodHandle.new(Opcodes::MH_GETSTATIC, path(cls), name, sig(*call_sig))
+    end
+    
+    def mh_putstatic(cls, name, *call_sig)
+      MethodHandle.new(Opcodes::MH_PUTSTATIC, path(cls), name, sig(*call_sig))
+    end
+    
+    def mh_getfield(cls, name, *call_sig)
+      MethodHandle.new(Opcodes::MH_GETFIELD, path(cls), name, sig(*call_sig))
+    end
+    
+    def mh_putfield(cls, name, *call_sig)
+      MethodHandle.new(Opcodes::MH_PUTFIELD, path(cls), name, sig(*call_sig))
+    end
+    
+    def sig_stack_net(call_sig)
+      case call_sig[0]
+      when nil, Java::void, java.lang.Void
+        added = 0
+      when Java::boolean, Java::short, Java::char, Java::int, Java::float
+        added = 1
+      when Java::long, Java::double
+        added = 2
+      else
+        added = 1
+      end
+
+      this_subtracted = #{const_name == 'INVOKESTATIC' ? 0 : 1}
+
+      args_subtracted = 0
+      [*call_sig][1..-1].each do |param|
+        case param
+        when nil, Java::void, java.lang.Void
+          args_subtracted += 0
+        when Java::boolean, Java::short, Java::char, Java::int, Java::float
+          args_subtracted += 1
+        when Java::long, Java::double
+          args_subtracted += 2
+        else
+          args_subtracted += 1
+        end
+      end
+
+      added - (this_subtracted + args_subtracted)
+    end
+    private :sig_stack_net
   end
 end
