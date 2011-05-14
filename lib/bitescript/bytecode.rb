@@ -104,7 +104,7 @@ module BiteScript
             def #{const_down}(type, name, call_sig)
               method_visitor.visit_method_insn(Opcodes::#{const_name}, path(type), name.to_s, sig(*call_sig))
 
-              sig_stack_net(call_sig)
+              sig_stack_net(call_sig, #{const_name == 'INVOKESTATIC' ? 0 : 1})
             end
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
@@ -115,7 +115,7 @@ module BiteScript
             def #{const_down}(name, call_sig, handle, *args)
               method_visitor.visit_invoke_dynamic_insn(name.to_s, sig(*call_sig), handle, args.to_java)
 
-              sig_stack_net(call_sig)
+              sig_stack_net(call_sig, 0)
             end
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
@@ -425,7 +425,7 @@ module BiteScript
       end
     end  
     
-    def sig_stack_net(call_sig)
+    def sig_stack_net(call_sig, this_subtracted)
       case call_sig[0]
       when nil, Java::void, java.lang.Void
         added = 0
@@ -436,8 +436,6 @@ module BiteScript
       else
         added = 1
       end
-
-      this_subtracted = #{const_name == 'INVOKESTATIC' ? 0 : 1}
 
       args_subtracted = 0
       [*call_sig][1..-1].each do |param|
