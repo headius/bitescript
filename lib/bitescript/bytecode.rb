@@ -282,6 +282,15 @@ module BiteScript
         end
         OpcodeInstructions['TABLESWITCH'] = 'tableswitch'
 
+      when "MH_INVOKESPECIAL", "MH_INVOKESTATIC", "MH_PUTSTATIC", "MH_GETSTATIC", "MH_PUTFIELD",
+          "MH_GETFIELD", "MH_INVOKEVIRTUAL", "MH_INVOKEINTERFACE",
+          "MH_NEWINVOKESPECIAL"
+        line = __LINE__; eval "
+            def #{const_down}(cls, name, *call_sig)
+              MethodHandle.new(Opcodes::#{const_name}, path(cls), name, sig(*call_sig))
+            end
+          ", b, __FILE__, line
+        OpcodeInstructions[const_name] = const_down
       when "F_FULL", "ACC_ENUM", "ACC_SYNTHETIC", "ACC_INTERFACE", "ACC_PUBLIC",
           "ACC_PRIVATE", "ACC_PROTECTED", "ACC_DEPRECATED", "ACC_BRIDGE",
           "ACC_VARARGS", "ACC_SUPER", "F_CHOP", "F_APPEND", "FLOAT", "F_SAME",
@@ -290,10 +299,7 @@ module BiteScript
           "T_DOUBLE", "DOUBLE", "ACC_STRICT", "NULL", "T_FLOAT", "ACC_FINAL",
           "F_SAME1", "ACC_NATIVE", "F_NEW", "T_CHAR", "T_INT", "ACC_VOLATILE",
           "V1_6", "V1_5", "V1_4", "V1_3", "V1_2", "V1_1", "UNINITIALIZED_THIS",
-          "TOP", "T_SHORT", "INVOKEDYNAMIC_OWNER", "V1_7", "MH_INVOKESPECIAL",
-          "MH_INVOKESTATIC", "MH_PUTSTATIC", "MH_GETSTATIC", "MH_PUTFIELD",
-          "MH_GETFIELD", "MH_INVOKEVIRTUAL", "MH_INVOKEINTERFACE",
-          "MH_NEWINVOKESPECIAL"
+          "TOP", "T_SHORT", "INVOKEDYNAMIC_OWNER", "V1_7"
           
         # non-instructions
 
@@ -417,43 +423,7 @@ module BiteScript
       else
         ldc_long(num)
       end
-    end
-    
-    def mh_invokestatic(cls, name, *call_sig)
-      MethodHandle.new(Opcodes::MH_INVOKESTATIC, path(cls), name, sig(*call_sig))
-    end
-
-    def mh_invokevirtual(cls, name, *call_sig)
-      MethodHandle.new(Opcodes::MH_INVOKEVIRTUAL, path(cls), name, sig(*call_sig))
-    end
-
-    def mh_invokeinterface(cls, name, *call_sig)
-      MethodHandle.new(Opcodes::MH_INVOKEINTERFACE, path(cls), name, sig(*call_sig))
-    end
-
-    def mh_invokespecial(cls, name, *call_sig)
-      MethodHandle.new(Opcodes::MH_INVOKESPECIAL, path(cls), name, sig(*call_sig))
-    end
-    
-    def mh_newinvokespecial(cls, name, *call_sig)
-      MethodHandle.new(Opcodes::MH_NEWINVOKESPECIAL, path(cls), name, sig(*call_sig))
-    end
-    
-    def mh_getstatic(cls, name, *call_sig)
-      MethodHandle.new(Opcodes::MH_GETSTATIC, path(cls), name, sig(*call_sig))
-    end
-    
-    def mh_putstatic(cls, name, *call_sig)
-      MethodHandle.new(Opcodes::MH_PUTSTATIC, path(cls), name, sig(*call_sig))
-    end
-    
-    def mh_getfield(cls, name, *call_sig)
-      MethodHandle.new(Opcodes::MH_GETFIELD, path(cls), name, sig(*call_sig))
-    end
-    
-    def mh_putfield(cls, name, *call_sig)
-      MethodHandle.new(Opcodes::MH_PUTFIELD, path(cls), name, sig(*call_sig))
-    end
+    end  
     
     def sig_stack_net(call_sig)
       case call_sig[0]
