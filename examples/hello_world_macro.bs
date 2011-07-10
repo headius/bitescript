@@ -4,20 +4,24 @@ import java.io.PrintStream
 macro :aprintln do
   getstatic System, :out, PrintStream
   swap
-  invokevirtual PrintStream, println, [Object]
+  invokevirtual PrintStream, "println", [void, object]
 end
 
 macro :aprint do
   getstatic System, :out, PrintStream
   swap
-  invokevirtual PrintStream, print, [Object]
+  invokevirtual PrintStream, "print", [void, object]
 end
 
 main do
   ldc "Hello, "
   aprint
+
+  # Get first argument from command line
   aload 0
-  aaload 0
+  ldc 0
+  aaload
+
   aprintln
   returnvoid
 end
