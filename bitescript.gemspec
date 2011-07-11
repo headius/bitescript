@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.name = %q{bitescript}
   s.version = "0.0.9"
   s.authors = ["Charles Oliver Nutter", "Ryan Brown"]
-  s.date = Time.now.strftime('YYYY-MM-DD')
+  s.date = Time.now.strftime('%Y-%m-%d')
   s.description = %q{BiteScript is a Ruby DSL for generating Java bytecode and classes.}
   s.email = ["headius@headius.com", "ribrdb@gmail.com"]
   s.executables = ["bite", "bitec"]

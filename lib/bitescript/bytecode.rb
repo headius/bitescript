@@ -39,7 +39,7 @@ module BiteScript
     
     OpcodeInstructions = {}
 
-    Opcodes.constants.each do |const_name|
+    Opcodes.constants.map(&:to_s).each do |const_name|
       const_down = const_name.downcase
       
       case const_name
