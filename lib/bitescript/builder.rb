@@ -318,10 +318,20 @@ module BiteScript
           field(Opcodes::ACC_#{modifier.upcase}, name, type)
         end
       ", binding, __FILE__, __LINE__
+      eval "
+        def #{modifier}_final_field(name, type)
+          field(Opcodes::ACC_#{modifier.upcase} | Opcodes::ACC_FINAL, name, type)
+        end
+      ", binding, __FILE__, __LINE__
       # static fields
       eval "
         def #{modifier}_static_field(name, type)
           field(Opcodes::ACC_STATIC | Opcodes::ACC_#{modifier.upcase}, name, type)
+        end
+      ", binding, __FILE__, __LINE__
+      eval "
+        def #{modifier}_static_final_field(name, type)
+          field(Opcodes::ACC_STATIC | Opcodes::ACC_#{modifier.upcase} | Opcodes::ACC_FINAL, name, type)
         end
       ", binding, __FILE__, __LINE__
       # instance methods; also defines a "this" local at index 0

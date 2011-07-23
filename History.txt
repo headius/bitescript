@@ -1,6 +1,22 @@
-=== 0.0.9 / 2011-03-20
+=== 0.0.9 / 2011-07-11
 
-* Fix MethodMirror to expose "parameter_types" to match JRuby's JavaClass
+62a10d2 Update time format in gemspec
+0d37ff9 Update hello_world_macro.bs example
+3b24a1d Fix TypeError in bytecode.rb with --1.9
+96dfbef Merge pull request #5 from baroquebobcat/fixing_test_method_insns_deltas
+2b06833 Merge pull request #4 from baroquebobcat/fix_bytecode_version_test
+501863d Merge pull request #6 from baroquebobcat/continue_to_work_when_asm_4.0_is_unavailable
+a4b82aa only define mh_* if those opcodes are present
+a556514 rescue + note around MethodHandle java import
+11472c7 copy and paste of sig_stack_net had a small bug. This fixes it
+d5a7e4d default is now dynamic depending on java version used
+7beeb5a Ask ASM to compute frames too.
+a9e1c61 Fix ASM package juggling for proper pre-1.6.0.RC2 package.
+c840664 Get invokedynamic support working.
+801bea4 Add args length checking to fib script, since it's always confusing to get ArrayIndexOutOfBounds.
+b537df1 Replace Label#set! calls with forward-referencing symbols.
+3bf6f98 Replace confusing load_time macro with current_time
+130bda6 Add .redcar to .gitignore.
 
 === 0.0.8 / 2011-03-05
 
