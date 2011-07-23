@@ -126,6 +126,7 @@ module BiteScript
 
     def define_class(class_name, opts, &block)
       pkg = opts[:package] || @package.dup || []
+      opts[:widen] ||= @widen_proc
 
       class_name = pkg.empty? ? class_name : "#{pkg.join('/')}/#{class_name}"
       class_builder = ClassBuilder.new(self, class_name, @file_name, opts)
@@ -141,7 +142,11 @@ module BiteScript
         return class_builder
       end
     end
-    
+
+    def to_widen(&block)
+      @widen_proc = block
+    end
+
     def public_class(class_name, superclass = java.lang.Object, *interfaces, &block)
       define_class(class_name, :visibility => :public, :superclass => superclass, :interfaces => interfaces, &block)
     end
@@ -201,7 +206,22 @@ module BiteScript
       false
     end
   end
-  
+
+  class CustomClassWriter < BiteScript::ASM::ClassWriter
+    def initialize(*args, &block)
+      super(*args)
+      @widen_proc = block
+    end
+    def getCommonSuperClass(a, b)
+      if @widen_proc
+        result = @widen_proc.call(a, b)
+        result
+      else
+        super
+      end
+    end
+  end
+
   class ClassBuilder
     include Util
     include QuickTypes
@@ -232,7 +252,7 @@ module BiteScript
         flags = Opcodes::ACC_INTERFACE | Opcodes::ACC_ABSTRACT
       end
 
-      @class_writer = ClassWriter.new(ClassWriter::COMPUTE_FRAMES | ClassWriter::COMPUTE_MAXS)
+      @class_writer = CustomClassWriter.new(ClassWriter::COMPUTE_FRAMES | ClassWriter::COMPUTE_MAXS, &opts[:widen])
       
       interface_paths = []
       (@interfaces).each {|interface| interface_paths << path(interface)}
