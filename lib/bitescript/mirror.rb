@@ -58,7 +58,7 @@ module BiteScript::ASM
       end
     end
 
-    class Builder
+    class Builder < BiteScript::ASM::AnnotationVisitor
       class ValueArray
         attr_reader :parent
         def initialize(annotation, array)
@@ -70,8 +70,6 @@ module BiteScript::ASM
           @array << value
         end
       end
-
-      include BiteScript::ASM::AnnotationVisitor
 
       attr_reader :annotation
       def initialize(desc, visible)
@@ -289,10 +287,7 @@ module BiteScript::ASM
       result << "}"
     end
 
-    class Builder
-      include BiteScript::ASM::ClassVisitor
-      include BiteScript::ASM::FieldVisitor
-      include BiteScript::ASM::MethodVisitor
+    class Builder < BiteScript::ASM::ClassVisitor
 
       def visit(version, access, name, signature, super_name, interfaces)
         @current = @class = ClassMirror.new(Type.getObjectType(name), access)
@@ -414,8 +409,7 @@ module BiteScript::ASM
     end
   end
 
-  class SignatureMirror
-    include BiteScript::ASM::SignatureVisitor
+  class SignatureMirror < BiteScript::ASM::SignatureVisitor
 
     attr_reader :type_parameters
     attr_reader :parameter_types, :return_type, :exception_types
@@ -570,8 +564,7 @@ module BiteScript::ASM
     end
   end
 
-  class GenericTypeBuilder
-    include BiteScript::ASM::SignatureVisitor
+  class GenericTypeBuilder < BiteScript::ASM::SignatureVisitor
     attr_reader :result
 
     def self.read(signature)

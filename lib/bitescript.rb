@@ -11,6 +11,7 @@ module BiteScript
   JAVA1_5 = Opcodes::V1_5
   JAVA1_6 = Opcodes::V1_6
   JAVA1_7 = Opcodes::V1_7
+  JAVA1_8 = Opcodes::V1_7
 
   class << self
     attr_accessor :bytecode_version

@@ -36,11 +36,12 @@ module BiteScript
     java_import asm_package.signature.SignatureVisitor
     java_import asm_package.signature.SignatureWriter
     
-    # MethodHandle was introduced in ASM 4.0, and is only available to
+    # Handle was introduced in ASM 4.0, and is only available to
     # JRuby > 1.6.1
     begin
-      java_import asm_package.MethodHandle 
+      java_import asm_package.Handle 
     rescue
+      fail "this version of bitescript requires ASM 4.0"
     end
   end
 end
