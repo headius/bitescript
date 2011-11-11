@@ -73,6 +73,7 @@ module BiteScript::ASM
 
       attr_reader :annotation
       def initialize(desc, visible)
+        super(BiteScript::ASM::Opcodes::ASM4)
         @current = @annotation = AnnotationMirror.new(Type.getType(desc))
       end
 
@@ -288,6 +289,10 @@ module BiteScript::ASM
     end
 
     class Builder < BiteScript::ASM::ClassVisitor
+      
+      def initialize
+        super(BiteScript::ASM::Opcodes::ASM4)
+      end
 
       def visit(version, access, name, signature, super_name, interfaces)
         @current = @class = ClassMirror.new(Type.getObjectType(name), access)
@@ -318,9 +323,9 @@ module BiteScript::ASM
 
       def visitField(flags, name, desc, signature, value)
         signature = GenericTypeBuilder.read(signature)
-        @current = FieldMirror.new(@class.type, flags, name, Type.getType(desc), signature, value)
-        @class.addField(@current)
-        self
+        mirror = FieldMirror.new(@class.type, flags, name, Type.getType(desc), signature, value)
+        @class.addField(mirror)
+        FieldMirror::Builder.new(mirror)
       end
 
       def visitMethod(flags, name, desc, signature, exceptions)
@@ -328,11 +333,11 @@ module BiteScript::ASM
         parameters = Type.getArgumentTypes(desc).to_a
         exceptions = (exceptions || []).map {|e| Type.getObjectType(e)}
         signature = SignatureMirror.new(signature) if signature
-        @current = MethodMirror.new(
+        mirror = MethodMirror.new(
             @class.type, flags, return_type, name, parameters, exceptions, signature)
-        @class.addMethod(@current)
+        @class.addMethod(mirror)
         # TODO parameter annotations, default value, etc.
-        self  # This isn't legal is it?
+        MethodMirror::Builder.new(mirror)
       end
 
       def visitAnnotationDefault(*args);end
@@ -342,7 +347,7 @@ module BiteScript::ASM
       end
     end
   end
-
+    
   class FieldMirror
     include Modifiers
     include Annotated
@@ -363,6 +368,21 @@ module BiteScript::ASM
 
     def inspect
       inspect_annotations + "#{modifier_string}#{type.getClassName} #{name};"
+    end
+    
+    class Builder < BiteScript::ASM::FieldVisitor
+      def initialize(mirror)
+        super(BiteScript::ASM::Opcodes::ASM4)
+        @current = @mirror
+      end
+
+      def mirror
+        @current
+      end
+  
+      def to_s
+        "FieldBuilder(#{type.class_name})"
+      end
     end
   end
 
@@ -407,6 +427,23 @@ module BiteScript::ASM
         argument_types.map {|x| x.class_name}.join(', '),
       ]
     end
+    
+    class Builder < BiteScript::ASM::MethodVisitor
+      
+      def initialize(mirror)
+        super(BiteScript::ASM::Opcodes::ASM4)
+        @current = mirror
+      end
+
+      def mirror
+        @current
+      end
+
+      def to_s
+        "MethodBuilder(#{type.class_name})"
+      end
+    end
+
   end
 
   class SignatureMirror < BiteScript::ASM::SignatureVisitor
@@ -424,6 +461,7 @@ module BiteScript::ASM
     end
 
     def initialize(signature=nil)
+      super(BiteScript::ASM::Opcodes::ASM4)
       @type_parameters = []
       @parameter_types = []
       @exception_types = []
@@ -577,6 +615,7 @@ module BiteScript::ASM
     end
 
     def initialize(&block)
+      super(BiteScript::ASM::Opcodes::ASM4)
       @block = block
     end
 
