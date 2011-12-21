@@ -1,9 +1,17 @@
 $: << File.dirname(__FILE__)
-require 'bitescript/asm'
-require 'bitescript/signature'
-require 'bitescript/bytecode'
-require 'bitescript/builder'
-require 'bitescript/mirror'
+begin
+  require 'bitescript/asm'
+  require 'bitescript/signature'
+  require 'bitescript/bytecode'
+  require 'bitescript/builder'
+  require 'bitescript/mirror'
+rescue LoadError
+  require 'bitescript/asm3/asm'
+  require 'bitescript/asm3/signature'
+  require 'bitescript/asm3/bytecode'
+  require 'bitescript/asm3/builder'
+  require 'bitescript/asm3/mirror'
+end
 
 module BiteScript
   include BiteScript::ASM
@@ -11,7 +19,7 @@ module BiteScript
   JAVA1_5 = Opcodes::V1_5
   JAVA1_6 = Opcodes::V1_6
   JAVA1_7 = Opcodes::V1_7
-  JAVA1_8 = Opcodes::V1_7
+  JAVA1_8 = defined?(Opcodes::V1_8) ? Opcodes::V1_8 : Opcodes::V1_7
 
   class << self
     attr_accessor :bytecode_version

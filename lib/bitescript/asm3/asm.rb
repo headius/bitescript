@@ -23,15 +23,6 @@ module BiteScript
         java_import asm_package.Opcodes
       end
     end
-    
-    # Handle was introduced in ASM 4.0, and is only available to
-    # JRuby > 1.6.1
-    begin
-      java_import asm_package.Handle 
-    rescue
-      raise LoadError, "ASM 4 not available, using ASM3 compat"
-    end
-    
     java_import asm_package.Label
     java_import asm_package.Type
     java_import asm_package.AnnotationVisitor
@@ -44,5 +35,12 @@ module BiteScript
     java_import asm_package.signature.SignatureReader
     java_import asm_package.signature.SignatureVisitor
     java_import asm_package.signature.SignatureWriter
+    
+    # MethodHandle was introduced in ASM 4.0, and is only available to
+    # JRuby > 1.6.1
+    begin
+      java_import asm_package.MethodHandle 
+    rescue
+    end
   end
 end
