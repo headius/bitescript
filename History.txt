@@ -1,5 +1,7 @@
 === 0.1.0 / 2011-11-10
 
+be71f3f Re-add old ASM3 versions of everything for backward compat.
+56e20b0 More fixes for ASM 4.0.
 9daf504 Fixes for asm 4.0.
 dff922a Added a note about the simple loop example explaining how it works.
 f0ba202 Merge pull request #2 from calavera/master
