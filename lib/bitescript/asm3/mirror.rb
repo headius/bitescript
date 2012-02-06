@@ -58,7 +58,7 @@ module BiteScript::ASM
       end
     end
 
-    class Builder < BiteScript::ASM::AnnotationVisitor
+    class Builder
       class ValueArray
         attr_reader :parent
         def initialize(annotation, array)
@@ -71,9 +71,10 @@ module BiteScript::ASM
         end
       end
 
+      include BiteScript::ASM::AnnotationVisitor
+
       attr_reader :annotation
       def initialize(desc, visible)
-        super(BiteScript::ASM::Opcodes::ASM4)
         @current = @annotation = AnnotationMirror.new(Type.getType(desc))
       end
 
@@ -288,11 +289,10 @@ module BiteScript::ASM
       result << "}"
     end
 
-    class Builder < BiteScript::ASM::ClassVisitor
-      
-      def initialize
-        super(BiteScript::ASM::Opcodes::ASM4)
-      end
+    class Builder
+      include BiteScript::ASM::ClassVisitor
+      include BiteScript::ASM::FieldVisitor
+      include BiteScript::ASM::MethodVisitor
 
       def visit(version, access, name, signature, super_name, interfaces)
         @current = @class = ClassMirror.new(Type.getObjectType(name), access)
@@ -323,9 +323,9 @@ module BiteScript::ASM
 
       def visitField(flags, name, desc, signature, value)
         signature = GenericTypeBuilder.read(signature)
-        mirror = FieldMirror.new(@class.type, flags, name, Type.getType(desc), signature, value)
-        @class.addField(mirror)
-        FieldMirror::Builder.new(mirror)
+        @current = FieldMirror.new(@class.type, flags, name, Type.getType(desc), signature, value)
+        @class.addField(@current)
+        self
       end
 
       def visitMethod(flags, name, desc, signature, exceptions)
@@ -333,11 +333,11 @@ module BiteScript::ASM
         parameters = Type.getArgumentTypes(desc).to_a
         exceptions = (exceptions || []).map {|e| Type.getObjectType(e)}
         signature = SignatureMirror.new(signature) if signature
-        mirror = MethodMirror.new(
+        @current = MethodMirror.new(
             @class.type, flags, return_type, name, parameters, exceptions, signature)
-        @class.addMethod(mirror)
+        @class.addMethod(@current)
         # TODO parameter annotations, default value, etc.
-        MethodMirror::Builder.new(mirror)
+        self  # This isn't legal is it?
       end
 
       def visitAnnotationDefault(*args);end
@@ -347,7 +347,7 @@ module BiteScript::ASM
       end
     end
   end
-    
+
   class FieldMirror
     include Modifiers
     include Annotated
@@ -368,21 +368,6 @@ module BiteScript::ASM
 
     def inspect
       inspect_annotations + "#{modifier_string}#{type.getClassName} #{name};"
-    end
-    
-    class Builder < BiteScript::ASM::FieldVisitor
-      def initialize(mirror)
-        super(BiteScript::ASM::Opcodes::ASM4)
-        @current = @mirror
-      end
-
-      def mirror
-        @current
-      end
-  
-      def to_s
-        "FieldBuilder(#{type.class_name})"
-      end
     end
   end
 
@@ -427,26 +412,10 @@ module BiteScript::ASM
         argument_types.map {|x| x.class_name}.join(', '),
       ]
     end
-    
-    class Builder < BiteScript::ASM::MethodVisitor
-      
-      def initialize(mirror)
-        super(BiteScript::ASM::Opcodes::ASM4)
-        @current = mirror
-      end
-
-      def mirror
-        @current
-      end
-
-      def to_s
-        "MethodBuilder(#{type.class_name})"
-      end
-    end
-
   end
 
-  class SignatureMirror < BiteScript::ASM::SignatureVisitor
+  class SignatureMirror
+    include BiteScript::ASM::SignatureVisitor
 
     attr_reader :type_parameters
     attr_reader :parameter_types, :return_type, :exception_types
@@ -461,7 +430,6 @@ module BiteScript::ASM
     end
 
     def initialize(signature=nil)
-      super(BiteScript::ASM::Opcodes::ASM4)
       @type_parameters = []
       @parameter_types = []
       @exception_types = []
@@ -602,7 +570,8 @@ module BiteScript::ASM
     end
   end
 
-  class GenericTypeBuilder < BiteScript::ASM::SignatureVisitor
+  class GenericTypeBuilder
+    include BiteScript::ASM::SignatureVisitor
     attr_reader :result
 
     def self.read(signature)
@@ -615,7 +584,6 @@ module BiteScript::ASM
     end
 
     def initialize(&block)
-      super(BiteScript::ASM::Opcodes::ASM4)
       @block = block
     end
 

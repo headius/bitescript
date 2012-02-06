@@ -1,3 +1,9 @@
+=== 0.1.0 / 2011-11-10
+
+9daf504 Fixes for asm 4.0.
+dff922a Added a note about the simple loop example explaining how it works.
+f0ba202 Merge pull request #2 from calavera/master
+
 === 0.0.9 / 2011-07-11
 
 62a10d2 Update time format in gemspec

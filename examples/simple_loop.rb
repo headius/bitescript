@@ -1,3 +1,12 @@
+# Simple Loop
+#
+# Run this file to create a SimpleLoop.class file.
+# It takes one argument and prints it out in a loop
+# until you stop the process.
+#
+#    ruby examples/simple_loop.rb
+#    java SimpleLoop repeatMe
+#
 require 'bitescript'
 
 include BiteScript

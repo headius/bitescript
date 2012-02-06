@@ -1,5 +1,5 @@
-require 'bitescript/asm'
-require 'bitescript/signature'
+require 'bitescript/asm3/asm'
+require 'bitescript/asm3/signature'
 
 module BiteScript
   # Bytecode is a simple adapter around an ASM MethodVisitor that makes it look like
@@ -282,12 +282,12 @@ module BiteScript
         end
         OpcodeInstructions['TABLESWITCH'] = 'tableswitch'
 
-      when "H_INVOKESPECIAL", "H_INVOKESTATIC", "H_PUTSTATIC", "H_GETSTATIC", "H_PUTFIELD",
-          "H_GETFIELD", "H_INVOKEVIRTUAL", "H_INVOKEINTERFACE",
-          "H_NEWINVOKESPECIAL"
+      when "MH_INVOKESPECIAL", "MH_INVOKESTATIC", "MH_PUTSTATIC", "MH_GETSTATIC", "MH_PUTFIELD",
+          "MH_GETFIELD", "MH_INVOKEVIRTUAL", "MH_INVOKEINTERFACE",
+          "MH_NEWINVOKESPECIAL"
         line = __LINE__; eval "
             def #{const_down}(cls, name, *call_sig)
-              Handle.new(Opcodes::#{const_name}, path(cls), name, sig(*call_sig))
+              MethodHandle.new(Opcodes::#{const_name}, path(cls), name, sig(*call_sig))
             end
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
@@ -299,7 +299,7 @@ module BiteScript
           "T_DOUBLE", "DOUBLE", "ACC_STRICT", "NULL", "T_FLOAT", "ACC_FINAL",
           "F_SAME1", "ACC_NATIVE", "F_NEW", "T_CHAR", "T_INT", "ACC_VOLATILE",
           "V1_6", "V1_5", "V1_4", "V1_3", "V1_2", "V1_1", "UNINITIALIZED_THIS",
-          "TOP", "T_SHORT", "INVOKEDYNAMIC_OWNER", "V1_7", "ASM4"
+          "TOP", "T_SHORT", "INVOKEDYNAMIC_OWNER", "V1_7"
           
         # non-instructions
 

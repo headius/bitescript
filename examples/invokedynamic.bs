@@ -8,7 +8,7 @@ JClass = java.lang.Class
 # Our main method, which does one invokedynamic
 main do
   # handle for our bootstrap, which binds invokedynamic to a CallSite
-  bootstrap = mh_invokestatic this, 'bootstrap', CallSite, Lookup, string, MethodType
+  bootstrap = h_invokestatic this, 'bootstrap', CallSite, Lookup, string, MethodType
 
   ldc 'Hello, invokedynamic!'
   invokedynamic 'print', [void, string], bootstrap
