@@ -253,8 +253,11 @@ module BiteScript
         flags = Opcodes::ACC_INTERFACE | Opcodes::ACC_ABSTRACT
       end
 
-      @class_writer = CustomClassWriter.new(ClassWriter::COMPUTE_FRAMES | ClassWriter::COMPUTE_MAXS, &opts[:widen])
-      
+      @class_writer = CustomClassWriter.new(
+          0 |
+          (BiteScript.compute_frames ? ClassWriter::COMPUTE_FRAMES : 0) |
+          (BiteScript.compute_maxs ? ClassWriter::COMPUTE_MAXS : 0),
+          &opts[:widen])
       
       interface_paths = []
       (@interfaces).each {|interface| interface_paths << path(interface)}
