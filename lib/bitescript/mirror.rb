@@ -248,7 +248,7 @@ module BiteScript::ASM
     end
 
     def type_parameters
-      signature.type_parameters is signature
+      signature.type_parameters if signature
     end
 
     def generic_superclass
@@ -415,7 +415,7 @@ module BiteScript::ASM
     end
 
     def type_parameters
-      signature.type_parameters is signature
+      signature.type_parameters if signature
     end
 
     def inspect
