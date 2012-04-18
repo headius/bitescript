@@ -124,4 +124,12 @@ class TestGenerics < Test::Unit::TestCase
     assert_equal "java.lang.Comparable<T>", t.bounds[0].to_s
     assert_equal "java.lang.Iterable<T>", t.bounds[1].to_s
   end
+  
+  def test_generic_parameter_types
+    mirror = BiteScript::ClassMirror.load('java.util.ArrayList')
+    method = mirror.getDeclaredMethods('add')[0]
+    assert_not_nil method.generic_parameter_types
+    puts method.generic_parameter_types
+    
+  end
 end

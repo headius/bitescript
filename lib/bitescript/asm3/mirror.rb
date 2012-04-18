@@ -385,6 +385,7 @@ module BiteScript::ASM
       @return_type = return_type
       @argument_types = parameters
       @exception_types = exceptions
+      @signature = signature
     end
 
     def generic_parameter_types
@@ -593,7 +594,7 @@ module BiteScript::ASM
     end
 
     def visitBaseType(desc)
-      return_type(Type.getType(desc.chr))
+p      return_type(Type.getType(desc.chr))
     end
 
     def visitArrayType

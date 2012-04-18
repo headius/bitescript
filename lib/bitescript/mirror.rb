@@ -400,6 +400,7 @@ module BiteScript::ASM
       @return_type = return_type
       @argument_types = parameters
       @exception_types = exceptions
+      @signature = signature
     end
 
     def generic_parameter_types
