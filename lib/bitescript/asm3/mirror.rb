@@ -594,7 +594,7 @@ module BiteScript::ASM
     end
 
     def visitBaseType(desc)
-p      return_type(Type.getType(desc.chr))
+      return_type(Type.getType(desc.chr))
     end
 
     def visitArrayType
