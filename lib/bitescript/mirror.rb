@@ -112,6 +112,20 @@ module BiteScript::ASM
     end
   end
 
+  module Generics
+    def inspect_type(type)
+      if type.kind_of?(BiteScript::ASM::Type)
+        type.class_name
+      else
+        type.to_s
+      end
+    end
+    
+    def inspect_generic(type, generic_type)
+      inspect_type(generic_type || type)
+    end
+  end
+
   module Annotated
     def annotations
       @annotations ||= {}
@@ -165,6 +179,7 @@ module BiteScript::ASM
   class ClassMirror
     include Annotated
     include Modifiers
+    include Generics
 
     attr_reader :type, :interfaces
     attr_accessor :superclass, :signature
@@ -270,22 +285,18 @@ module BiteScript::ASM
         kind = "class"
       end
       if superclass && !enum? && !interface?
-        extends = "extends #{superclass.getClassName} "
+        extends = "extends #{inspect_generic(superclass, generic_superclass)} "
       end
       if self.interfaces && !self.interfaces.empty?
-        interfaces = self.interfaces.map{|i| i.class_name}.join(', ')
+        interfaces = (self.generic_interfaces || self.interfaces).map do |i|
+          inspect_type(i)
+        end.join(', ')
         if interface?
           extends = "extends #{interfaces} "
         else
           implements = "implements #{interfaces} "
         end
       end
-      result = "#{inspect_annotations}#{modifier_string}#{kind} "
-      result << "#{type.class_name} #{extends}{\n"
-      (getDeclaredFields + getConstructors + getDeclaredMethods).each do |f|
-        result << f.inspect << "\n"
-      end
-      result << "}"
     end
 
     class Builder < BiteScript::ASM::ClassVisitor
@@ -350,6 +361,7 @@ module BiteScript::ASM
     
   class FieldMirror
     include Modifiers
+    include Generics
     include Annotated
 
     attr_reader :declaring_class, :name, :type, :value, :signature
@@ -367,7 +379,8 @@ module BiteScript::ASM
     end
 
     def inspect
-      inspect_annotations + "#{modifier_string}#{type.getClassName} #{name};"
+      typename = inspect_generic(type, signature)
+      inspect_annotations + "#{modifier_string}#{typename} #{name};"
     end
     
     class Builder < BiteScript::ASM::FieldVisitor
@@ -389,6 +402,7 @@ module BiteScript::ASM
   class MethodMirror
     include Modifiers
     include Annotated
+    include Generics
 
     attr_reader :declaring_class, :name, :return_type
     attr_reader :argument_types, :exception_types, :signature
@@ -420,12 +434,14 @@ module BiteScript::ASM
     end
 
     def inspect
-      "%s%s%s %s(%s);" % [
+      typevars = "<#{type_parameters.map{|p| p.to_s}.join ', '}> " if type_parameters && type_parameters.size != 0
+      "%s%s%s%s %s(%s);" % [
         inspect_annotations,
         modifier_string,
-        return_type.class_name,
+        typevars,
+        inspect_generic(return_type, generic_return_type),
         name,
-        argument_types.map {|x| x.class_name}.join(', '),
+        (generic_parameter_types || argument_types).map {|x| inspect_type(x)}.join(', '),
       ]
     end
     
@@ -507,6 +523,7 @@ module BiteScript::ASM
   end
 
   class GenericTypeMirror
+    include Generics
     def array?
       false
     end
@@ -562,11 +579,11 @@ module BiteScript::ASM
     def wildcard?
       true
     end
-    def to_s?
+    def to_s
       if lower_bound
-        "? super #{lower_bound}"
+        "? super #{inspect_type(lower_bound)}"
       elsif upper_bound
-        "? extends #{upper_bound}"
+        "? extends #{inspect_type(upper_bound)}"
       else
         "?"
       end
