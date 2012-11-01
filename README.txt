@@ -30,7 +30,7 @@ fb = FileBuilder.build(__FILE__) do
 end
 
 fb.generate do |filename, class_builder|
-  File.open(filename, 'w') do |file|
+  File.open(filename, 'wb') do |file|
     file.write(class_builder.generate)
   end
 end
