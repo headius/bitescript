@@ -1,3 +1,19 @@
+=== 0.1.1 / 2012-11-02
+
+ba61804 Fixes for printing generics
+99176d7 Fix another typo
+c92f2a1 Fix generics typo
+0a44001 Fix using ClassMirrors as an annotation type
+fc7b508 Fix typo in generics
+3fdbf72 Modify asm3 stuff to configure frame/stack computation too.
+f473192 Allow configuring frame and stack computation.
+79efa1e Update history again for 0.1.0.
+e47bf31 port the to_widen functionality to asm3
+7e51ec9 Merge remote-tracking branch 'origin'
+e8eb48e Update history again for 0.1.0.
+8db7cc8 Merge branch 'master' of github.com:headius/bitescript
+b26d74a Add support for overriding getCommonSuperClass for writing frames
+
 === 0.1.0 / 2011-11-10
 
 be71f3f Re-add old ASM3 versions of everything for backward compat.
