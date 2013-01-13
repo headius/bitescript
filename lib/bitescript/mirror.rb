@@ -332,6 +332,8 @@ module BiteScript::ASM
         builder
       end
 
+      def visitParameterAnnotation(paramIndex, desc, visible);end
+
       def visitField(flags, name, desc, signature, value)
         signature = GenericTypeBuilder.read(signature)
         mirror = FieldMirror.new(@class.type, flags, name, Type.getType(desc), signature, value)
