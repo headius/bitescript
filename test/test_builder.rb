@@ -296,8 +296,7 @@ class TestBuilder < Test::Unit::TestCase
     dummy_constructor(cb)
     obj = load_and_construct(@class_name, cb);
     
-    # expect NativeException (UnsatisfiedLinkError)
-    assert_raises(NativeException) {obj.yoohoo}
+    assert_raises(Java::JavaLang::UnsatisfiedLinkError) {obj.yoohoo}
   end
 
   def test_fields
