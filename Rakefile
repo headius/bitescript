@@ -1,7 +1,6 @@
 require 'rake'
 require 'rake/testtask'
-require 'rake/rdoctask'
-$: << './lib'
+require 'rdoc/task'
 
 task :default => :test
 
