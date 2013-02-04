@@ -168,6 +168,8 @@ module BiteScript::ASM
       code << "modifiers << '#{name.downcase} ' if #{name.downcase}?\n"
     end
 
+    add_modifier 'varargs'
+
     class_eval <<-EOF
       def modifier_string
         modifiers = ''
