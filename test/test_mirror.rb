@@ -13,7 +13,7 @@ class TestMirror < Test::Unit::TestCase
   def test_varargs_false_on_non_varargs_method
     cmirror = ClassMirror.load 'java.lang.String'
     mmirror = cmirror.getDeclaredMethods('copyValueOf').first
-    assert_false mmirror.varargs?
+    assert !mmirror.varargs?
   end
 
 end
