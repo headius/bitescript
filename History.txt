@@ -1,3 +1,13 @@
+=== 0.1.2 / 2013-02-24
+
+3ff2e52 ensure that frame setting is updated when bytecode version is
+24e8363 add aliases for h_* opcodes for asm3 support
+67e22e6 fix up test for 1.7
+1e7add0 oops there's no assert_false
+83d5862 clean up rake file
+8a72f8e add varargs support to mirrors
+a8e2b4d ignore parameter annotations instead of blowing up when building a mirror
+
 === 0.1.1 / 2012-11-02
 
 ba61804 Fixes for printing generics
