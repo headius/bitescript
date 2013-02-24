@@ -289,6 +289,7 @@ module BiteScript
             def #{const_down}(cls, name, *call_sig)
               MethodHandle.new(Opcodes::#{const_name}, path(cls), name, sig(*call_sig))
             end
+            alias #{const_down[1..-1]} #{const_down}
           ", b, __FILE__, line
         OpcodeInstructions[const_name] = const_down
       when "F_FULL", "ACC_ENUM", "ACC_SYNTHETIC", "ACC_INTERFACE", "ACC_PUBLIC",
