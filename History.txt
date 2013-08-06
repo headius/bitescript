@@ -1,3 +1,7 @@
+=== 0.1.4 / 2013-08-95
+
+7474613 fix namespacing for travis-ci jruby version
+
 === 0.1.3 / 2013-08-95
 
 fc71fe7 make extended types persistent to avoid warning
