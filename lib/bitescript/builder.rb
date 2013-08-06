@@ -3,6 +3,11 @@ require 'bitescript/signature'
 require 'fileutils'
 
 module BiteScript
+  java_import org.jruby.org.objectweb.asm.FieldWriter
+  java_import org.jruby.org.objectweb.asm.AnnotationWriter
+  FieldWriter.__persistent__ = true
+  AnnotationWriter.__persistent__ = true
+
   module Util
     def type_from_dotted(dotted_name)
       JavaUtilities.get_proxy_class(dotted_name).java_class
