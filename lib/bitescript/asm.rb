@@ -44,5 +44,12 @@ module BiteScript
     java_import asm_package.signature.SignatureReader
     java_import asm_package.signature.SignatureVisitor
     java_import asm_package.signature.SignatureWriter
+
+    java_import asm_package.AnnotationWriter
+    java_import asm_package.FieldWriter
+
+    FieldWriter.__persistent__ = true
+    AnnotationWriter.__persistent__ = true
+
   end
 end
