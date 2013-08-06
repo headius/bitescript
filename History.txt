@@ -1,3 +1,7 @@
+=== 0.1.3 / 2013-08-95
+
+fc71fe7 make extended types persistent to avoid warning
+
 === 0.1.2 / 2013-02-24
 
 3ff2e52 ensure that frame setting is updated when bytecode version is
