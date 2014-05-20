@@ -18,5 +18,5 @@ end
 
 fb.generate do |filename, classbuilder|
   bytes = classbuilder.generate
-  File.open(filename, 'w') {|f| f.write(bytes)}
+  File.open(filename, 'wr') {|f| f.write(bytes)}
 end
