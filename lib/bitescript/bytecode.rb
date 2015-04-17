@@ -299,7 +299,7 @@ module BiteScript
           "T_DOUBLE", "DOUBLE", "ACC_STRICT", "NULL", "T_FLOAT", "ACC_FINAL",
           "F_SAME1", "ACC_NATIVE", "F_NEW", "T_CHAR", "T_INT", "ACC_VOLATILE",
           "V1_6", "V1_5", "V1_4", "V1_3", "V1_2", "V1_1", "UNINITIALIZED_THIS",
-          "TOP", "T_SHORT", "INVOKEDYNAMIC_OWNER", "V1_7", "ASM4"
+          "TOP", "T_SHORT", "INVOKEDYNAMIC_OWNER", "V1_7", "ASM4", "ASM5", "V1_8", "ACC_MANDATED"
           
         # non-instructions
 
